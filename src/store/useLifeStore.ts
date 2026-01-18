@@ -39,6 +39,9 @@ export const useLifeStore = create<LifeStore>()((set, get) => ({
     },
 
     fetchCategories: async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
         const { data, error } = await supabase
             .from('categories')
             .select('*')
@@ -49,14 +52,35 @@ export const useLifeStore = create<LifeStore>()((set, get) => ({
             return;
         }
 
-        const categories: Category[] = (data || []).map((c) => ({
+        let fetchedCategories: Category[] = (data || []).map((c) => ({
             id: c.id,
             name: c.name,
             color: c.color,
             userId: c.user_id,
         }));
 
-        set({ categories });
+        // Default categories for new users (if no categories exist and user created recently)
+        if (fetchedCategories.length === 0) {
+            const userCreatedAt = new Date(user.created_at).getTime();
+            const now = new Date().getTime();
+            // If user created less than 5 minutes ago
+            if (now - userCreatedAt < 5 * 60 * 1000) {
+                console.log('New user detected, creating default categories...');
+                const defaultCats = [
+                    { name: 'Vie amoureuse', color: 'rose' },
+                    { name: 'Vie professionnelle', color: 'blue' },
+                    { name: 'Vie Familiale', color: 'emerald' }
+                ];
+
+                for (const cat of defaultCats) {
+                    await get().addCategory(cat);
+                }
+                // Refetch to update state correctly
+                return get().fetchCategories();
+            }
+        }
+
+        set({ categories: fetchedCategories });
     },
 
     addCategory: async (newCategory) => {

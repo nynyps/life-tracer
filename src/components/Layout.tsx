@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Layers, Heart, Plus, Activity, LogOut, Settings } from 'lucide-react';
+import { Layers, Heart, Plus, Activity, LogOut, Settings, User, KeyRound, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 import { useLifeStore } from '../store/useLifeStore';
 import CategoryManagerModal from './CategoryManagerModal';
 
@@ -10,13 +11,23 @@ interface LayoutProps {
     onOpenAddModal: () => void;
     zoomLevel: number;
     setZoomLevel: (level: number) => void;
+    isCategoryModalOpen: boolean;
+    onOpenCategoryManager: () => void;
+    onCloseCategoryManager: () => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, onOpenAddModal, zoomLevel, setZoomLevel }) => {
+const Layout: React.FC<LayoutProps> = ({
+    children,
+    onOpenAddModal,
+    zoomLevel,
+    setZoomLevel,
+    isCategoryModalOpen,
+    onOpenCategoryManager,
+    onCloseCategoryManager
+}) => {
     const location = useLocation();
     const { user, signOut } = useAuth();
     const categories = useLifeStore((state) => state.categories);
-    const [isCategoryModalOpen, setIsCategoryModalOpen] = React.useState(false);
 
     const navItems = [
         { path: '/', label: 'Tout', icon: Layers },
@@ -60,7 +71,7 @@ const Layout: React.FC<LayoutProps> = ({ children, onOpenAddModal, zoomLevel, se
                             );
                         })}
                         <button
-                            onClick={() => setIsCategoryModalOpen(true)}
+                            onClick={onOpenCategoryManager}
                             className="p-2 hover:bg-white/5 rounded-full text-slate-500 hover:text-slate-300 transition-all ml-1"
                             title="Gérer les catégories"
                         >
@@ -72,22 +83,24 @@ const Layout: React.FC<LayoutProps> = ({ children, onOpenAddModal, zoomLevel, se
                     <div className="flex items-center gap-4 justify-self-end">
 
                         {/* Zoom Control */}
-                        <div className="hidden sm:flex items-center gap-3 bg-slate-900/50 p-1.5 rounded-lg border border-white/10 pr-3">
-                            <span className="text-[10px] text-slate-400 font-mono tracking-wider ml-1">ZOOM</span>
-                            <input
-                                type="range"
-                                min="100"
-                                max="4000"
-                                step="100"
-                                value={zoomLevel}
-                                onChange={(e) => setZoomLevel(Number(e.target.value))}
-                                className="w-24 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-indigo-500 [&::-webkit-slider-thumb]:rounded-full hover:[&::-webkit-slider-thumb]:bg-indigo-400 transition-all"
-                                title="Ajuster l'échelle de temps"
-                            />
-                            <span className="text-xs text-indigo-400 font-mono w-10 text-right font-bold">
-                                {Math.round((zoomLevel / 1000) * 100)}%
-                            </span>
-                        </div>
+                        {location.pathname !== '/global' && (
+                            <div className="hidden sm:flex items-center gap-3 bg-slate-900/50 p-1.5 rounded-lg border border-white/10 pr-3">
+                                <span className="text-[10px] text-slate-400 font-mono tracking-wider ml-1">ZOOM</span>
+                                <input
+                                    type="range"
+                                    min="100"
+                                    max="4000"
+                                    step="100"
+                                    value={zoomLevel}
+                                    onChange={(e) => setZoomLevel(Number(e.target.value))}
+                                    className="w-24 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-indigo-500 [&::-webkit-slider-thumb]:rounded-full hover:[&::-webkit-slider-thumb]:bg-indigo-400 transition-all"
+                                    title="Ajuster l'échelle de temps"
+                                />
+                                <span className="text-xs text-indigo-400 font-mono w-10 text-right font-bold">
+                                    {Math.round((zoomLevel / 1000) * 100)}%
+                                </span>
+                            </div>
+                        )}
 
                         <button
                             onClick={onOpenAddModal}
@@ -97,18 +110,57 @@ const Layout: React.FC<LayoutProps> = ({ children, onOpenAddModal, zoomLevel, se
                             <span className="hidden sm:inline">Ajouter</span>
                         </button>
 
-                        {/* User & Logout */}
-                        <div className="flex items-center gap-3">
-                            <span className="hidden md:block text-xs text-slate-500 truncate max-w-[150px]">
-                                {user?.email}
-                            </span>
-                            <button
-                                onClick={signOut}
-                                className="p-2 rounded-full bg-slate-800/50 hover:bg-slate-700 text-slate-400 hover:text-red-400 transition-all"
-                                title="Se déconnecter"
-                            >
-                                <LogOut className="w-4 h-4" />
+                        {/* User & Dropdown */}
+                        <div className="relative group">
+                            <button className="flex items-center gap-2 p-2 rounded-full hover:bg-white/5 transition-all outline-none">
+                                <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 text-indigo-300">
+                                    <User className="w-4 h-4" />
+                                </div>
                             </button>
+
+                            {/* Dropdown Menu */}
+                            <div className="absolute right-0 top-full mt-2 w-64 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-1 invisible opacity-0 translate-y-2 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 transition-all duration-200 z-50">
+                                <div className="px-3 py-3 border-b border-slate-800 mb-1">
+                                    <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Connecté en tant que</p>
+                                    <p className="text-sm text-slate-200 truncate font-semibold">{user?.email}</p>
+                                </div>
+
+                                <button
+                                    onClick={async () => {
+                                        // Simple password reset trigger (sends email)
+                                        const { error } = await supabase.auth.resetPasswordForEmail(user?.email || '');
+                                        if (!error) alert('Email de réinitialisation envoyé !');
+                                    }}
+                                    className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 rounded-lg flex items-center gap-2 transition-colors"
+                                >
+                                    <KeyRound className="w-4 h-4 text-slate-400" />
+                                    Changer mot de passe
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
+                                            // Ideally this calls a cloud function. For now we just sign out as frontend deletion is blocked.
+                                            alert('Pour supprimer votre compte, veuillez contacter le support ou utiliser l\'interface d\'administration (cette fonctionnalité nécessite une fonction serveur sécurisée).');
+                                            signOut();
+                                        }
+                                    }}
+                                    className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg flex items-center gap-2 transition-colors"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                    Supprimer le compte
+                                </button>
+
+                                <div className="h-px bg-slate-800 my-1 mx-2" />
+
+                                <button
+                                    onClick={signOut}
+                                    className="w-full text-left px-3 py-2 text-sm text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg flex items-center gap-2 transition-colors"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    Se déconnecter
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -141,7 +193,7 @@ const Layout: React.FC<LayoutProps> = ({ children, onOpenAddModal, zoomLevel, se
 
             <CategoryManagerModal
                 isOpen={isCategoryModalOpen}
-                onClose={() => setIsCategoryModalOpen(false)}
+                onClose={onCloseCategoryManager}
             />
         </div>
     );

@@ -51,6 +51,7 @@ const CategoryRoute: React.FC<{
 function AppContent() {
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<LifeEvent | null>(null);
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -109,6 +110,7 @@ function AppContent() {
     onDelete: handleDelete,
     onToggleImportant: handleToggleImportant,
     pixelsPerYear,
+    onOpenCategoryManager: () => setIsCategoryManagerOpen(true),
   };
 
   return (
@@ -123,6 +125,9 @@ function AppContent() {
                 onOpenAddModal={handleOpenAddModal}
                 zoomLevel={pixelsPerYear}
                 setZoomLevel={setPixelsPerYear}
+                isCategoryModalOpen={isCategoryManagerOpen}
+                onOpenCategoryManager={() => setIsCategoryManagerOpen(true)}
+                onCloseCategoryManager={() => setIsCategoryManagerOpen(false)}
               >
                 <Routes>
                   <Route path="/" element={<Timeline events={events} {...commonProps} />} />

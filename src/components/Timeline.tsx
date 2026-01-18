@@ -11,11 +11,12 @@ interface TimelineProps {
     onDelete?: (id: string) => void;
     onToggleImportant?: (event: LifeEvent) => void;
     pixelsPerYear: number;
+    onOpenCategoryManager?: () => void;
 }
 
 const START_PADDING = 50;
 
-const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleImportant, pixelsPerYear }) => {
+const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleImportant, pixelsPerYear, onOpenCategoryManager }) => {
     const categories = useLifeStore((state) => state.categories);
 
     // 1. Calculate Time Range
@@ -58,9 +59,18 @@ const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleI
     if (displayCategories.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-40 opacity-50 px-4 text-center">
-                <div className="bg-slate-900 border border-slate-800 p-10 rounded-3xl max-w-md">
+                <div className="bg-slate-900 border border-slate-800 p-10 rounded-3xl max-w-md flex flex-col items-center">
                     <p className="text-xl font-medium mb-4 text-slate-200">Commencez par créer une catégorie</p>
                     <p className="text-sm text-slate-400 mb-6">Cliquez sur l'icône de paramètres dans la barre de navigation pour organiser vos souvenirs par colonnes.</p>
+                    {onOpenCategoryManager && (
+                        <button
+                            onClick={onOpenCategoryManager}
+                            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-full font-medium transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
+                        >
+                            <span className="text-xl leading-none mb-0.5">+</span>
+                            Créer une catégorie
+                        </button>
+                    )}
                 </div>
             </div>
         );
