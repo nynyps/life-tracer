@@ -24,6 +24,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
         description: '',
         location: '',
         people: '',
+        isImportant: false,
     });
 
     const holoceneYear = toHE(new Date(formData.date).getFullYear());
@@ -38,6 +39,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                     description: initialData.description || '',
                     location: initialData.location || '',
                     people: initialData.people ? initialData.people.join(', ') : '',
+                    isImportant: initialData.isImportant || false,
                 });
             } else {
                 setFormData({
@@ -47,10 +49,11 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                     description: '',
                     location: '',
                     people: '',
+                    isImportant: false,
                 });
             }
         }
-    }, [isOpen, initialData]);
+    }, [isOpen, initialData, categories]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -126,7 +129,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                                     <div className="flex items-center justify-between">
                                         <label className="text-xs font-medium uppercase tracking-wider text-slate-400">Date</label>
                                         <span className="text-[10px] font-bold bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-500/30">
-                                            {holoceneYear} HE
+                                            {holoceneYear}
                                         </span>
                                     </div>
                                     <div className="relative">
@@ -210,6 +213,26 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                                             placeholder="Jean, Marie..."
                                             className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600"
                                         />
+                                    </div>
+                                </div>
+                                {/* Super Souvenir Checkbox */}
+                                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 flex items-start gap-4">
+                                    <div className="pt-0.5">
+                                        <input
+                                            type="checkbox"
+                                            id="isImportant"
+                                            checked={!!formData.isImportant}
+                                            onChange={e => setFormData({ ...formData, isImportant: e.target.checked })}
+                                            className="w-5 h-5 bg-slate-950 border-slate-700 rounded text-amber-500 focus:ring-amber-500/50 focus:ring-offset-0 cursor-pointer accent-amber-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="isImportant" className="block text-sm font-bold text-amber-200 mb-1 cursor-pointer">
+                                            Définir comme Super-Souvenir
+                                        </label>
+                                        <p className="text-xs text-amber-200/60 leading-relaxed">
+                                            Les super-souvenirs marquent les étapes majeures de votre vie. Ils seront mis en avant visuellement dans la vue globale avec leur titre affiché.
+                                        </p>
                                     </div>
                                 </div>
                             </div>

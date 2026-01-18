@@ -55,7 +55,7 @@ function AppContent() {
   const [editingEvent, setEditingEvent] = useState<LifeEvent | null>(null);
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [pixelsPerYear, setPixelsPerYear] = useState(1000);
+  const [pixelsPerYear, setPixelsPerYear] = useState(100);
 
   const events = useLifeStore((state) => state.events);
   const fetchInitialData = useLifeStore((state) => state.fetchInitialData);
@@ -111,6 +111,7 @@ function AppContent() {
     onToggleImportant: handleToggleImportant,
     pixelsPerYear,
     onOpenCategoryManager: () => setIsCategoryManagerOpen(true),
+    onOpenAddModal: handleOpenAddModal,
   };
 
   return (

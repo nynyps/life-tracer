@@ -2,8 +2,8 @@ import React, { useMemo } from 'react';
 import type { LifeEvent } from '../types';
 import EventCard from './EventCard';
 import { useLifeStore } from '../store/useLifeStore';
-
 import { toHE } from '../utils/dateUtils';
+import { Plus } from 'lucide-react';
 
 interface TimelineProps {
     events: LifeEvent[];
@@ -12,11 +12,12 @@ interface TimelineProps {
     onToggleImportant?: (event: LifeEvent) => void;
     pixelsPerYear: number;
     onOpenCategoryManager?: () => void;
+    onOpenAddModal?: () => void;
 }
 
 const START_PADDING = 50;
 
-const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleImportant, pixelsPerYear, onOpenCategoryManager }) => {
+const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleImportant, pixelsPerYear, onOpenCategoryManager, onOpenAddModal }) => {
     const categories = useLifeStore((state) => state.categories);
 
     // 1. Calculate Time Range
@@ -53,9 +54,9 @@ const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleI
     };
 
     // Categories to display as columns
-    // If we have categories, we use them. If we have no categories yet, we show a default message.
     const displayCategories = categories;
 
+    // Empty State: No Categories
     if (displayCategories.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-40 opacity-50 px-4 text-center">
@@ -76,7 +77,7 @@ const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleI
         );
     }
 
-    // Show empty state when no events exist
+    // Empty State: Categories exist but no events
     if (!hasVisibleEvents) {
         return (
             <div className="flex flex-col items-center justify-center py-40 px-4 text-center">
@@ -87,12 +88,20 @@ const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleI
                         </svg>
                     </div>
                     <p className="text-xl font-medium mb-3 text-slate-200">Aucun souvenir pour le moment</p>
-                    <p className="text-sm text-slate-400">Cliquez sur <strong className="text-indigo-400">Ajouter</strong> pour créer votre premier souvenir et commencer à tracer votre vie.</p>
+                    <p className="text-sm text-slate-400 mb-6">Cliquez sur le bouton ci-dessous pour créer votre premier souvenir et commencer à tracer votre vie.</p>
+                    {onOpenAddModal && (
+                        <button
+                            onClick={onOpenAddModal}
+                            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-full font-medium transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
+                        >
+                            <Plus className="w-5 h-5" />
+                            Ajouter un souvenir
+                        </button>
+                    )}
                 </div>
             </div>
         );
     }
-
 
     return (
         <div className="relative w-full min-h-screen overflow-x-auto pb-20">
@@ -121,7 +130,6 @@ const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleI
                         height: years.length * pixelsPerYear + 200
                     }}
                 >
-
                     {/* Time Ruler (Left Column) */}
                     <div className="border-r border-slate-800/30 relative">
                         {years.map((year: number) => (

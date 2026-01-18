@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { LifeEvent } from '../types';
 import { Calendar, Tag, Check, Filter } from 'lucide-react';
 import { useLifeStore } from '../store/useLifeStore';
@@ -12,6 +13,7 @@ interface GlobalTimelineProps {
 const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
     const categories = useLifeStore((state) => state.categories);
     const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+    const navigate = useNavigate();
 
     // Initialize selection if categories exist
     React.useEffect(() => {
@@ -131,7 +133,7 @@ const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
                         </button>
                     )
                 })}
-            </div>
+            </div >
 
             <div className="w-full max-w-[1400px] flex flex-col gap-20 px-12 pb-24 pt-8 relative">
                 {rows.map((row: any, rowIndex: number) => {
@@ -227,20 +229,26 @@ const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
                                     >
                                         {/* Super Souvenir Title */}
                                         {event.isImportant && (
-                                            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-slate-200 bg-slate-900/90 px-2 py-1 rounded-md border border-slate-700/50">
+                                            <div
+                                                onClick={(e) => { e.stopPropagation(); navigate(`/category/${category?.id}#event-${event.id}`); }}
+                                                className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-slate-200 bg-slate-900/90 px-2 py-1 rounded-md border border-slate-700/50 cursor-pointer hover:bg-slate-800 transition-colors">
                                                 {event.title}
                                             </div>
                                         )}
 
                                         {/* Trigger Area */}
-                                        <div className={`${event.isImportant
-                                            ? `w-1.5 h-14 -mt-5 ${dotColor} ${shadowColor} shadow-xl border border-white/30`
-                                            : `w-5 h-5 rounded-full ${dotColor} ${shadowColor} border-2 border-slate-900 shadow-lg`
-                                            } cursor-pointer transform transition-all group-hover:scale-150 group-hover:z-50`}
+                                        <div
+                                            onClick={() => navigate(`/category/${category?.id}#event-${event.id}`)}
+                                            className={`${event.isImportant
+                                                ? `w-1.5 h-14 -mt-5 ${dotColor} ${shadowColor} shadow-xl border border-white/30`
+                                                : `w-5 h-5 rounded-full ${dotColor} ${shadowColor} border-2 border-slate-900 shadow-lg`
+                                                } cursor-pointer transform transition-all group-hover:scale-150 group-hover:z-50`}
                                         />
 
                                         {/* Tooltip */}
-                                        <div className={`absolute bottom-full mb-4 hidden group-hover:block z-50 w-64 ${tooltipAlignClass}`}>
+                                        <div
+                                            onClick={() => navigate(`/category/${category?.id}#event-${event.id}`)}
+                                            className={`absolute bottom-full mb-4 hidden group-hover:block z-50 w-64 ${tooltipAlignClass} cursor-pointer`}>
                                             <div className="bg-slate-800/90 backdrop-blur-md p-3 rounded-lg border border-slate-700 shadow-2xl text-left animate-in fade-in zoom-in-95 duration-200">
                                                 <div className={`h-1 w-full mb-2 rounded-full ${dotColor.split(' ')[0]}`} />
                                                 <h3 className="font-bold text-slate-100 text-sm mb-1">{event.title}</h3>
@@ -262,7 +270,7 @@ const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
                     );
                 })}
             </div>
-        </div>
+        </div >
     );
 };
 

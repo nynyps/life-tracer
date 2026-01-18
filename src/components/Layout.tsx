@@ -27,6 +27,8 @@ const Layout: React.FC<LayoutProps> = ({
 }) => {
     const location = useLocation();
     const { user, signOut } = useAuth();
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+    const [isDeleting, setIsDeleting] = React.useState(false);
     const categories = useLifeStore((state) => state.categories);
 
     const navItems = [
@@ -103,8 +105,13 @@ const Layout: React.FC<LayoutProps> = ({
                         )}
 
                         <button
-                            onClick={onOpenAddModal}
-                            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-full text-sm font-medium transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
+                            onClick={categories.length > 0 ? onOpenAddModal : undefined}
+                            disabled={categories.length === 0}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-lg ${categories.length === 0
+                                ? 'bg-slate-800 text-slate-500 cursor-not-allowed shadow-none'
+                                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/20 active:scale-95'
+                                }`}
+                            title={categories.length === 0 ? "Créez d'abord une catégorie" : "Ajouter un souvenir"}
                         >
                             <Plus className="w-4 h-4" />
                             <span className="hidden sm:inline">Ajouter</span>
@@ -138,23 +145,7 @@ const Layout: React.FC<LayoutProps> = ({
                                 </button>
 
                                 <button
-                                    onClick={async () => {
-                                        if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Toutes vos données seront effacées définitivement.')) {
-                                            try {
-                                                const { error } = await supabase.rpc('delete_user');
-                                                if (error) {
-                                                    console.error('Error deleting account:', error);
-                                                    alert('Erreur lors de la suppression du compte : ' + error.message);
-                                                } else {
-                                                    await signOut();
-                                                    alert('Votre compte a été supprimé avec succès.');
-                                                }
-                                            } catch (err) {
-                                                console.error('Unexpected error:', err);
-                                                alert('Une erreur inattendue est survenue.');
-                                            }
-                                        }
-                                    }}
+                                    onClick={() => setIsDeleteModalOpen(true)}
                                     className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg flex items-center gap-2 transition-colors"
                                 >
                                     <Trash2 className="w-4 h-4" />
@@ -205,6 +196,50 @@ const Layout: React.FC<LayoutProps> = ({
                 isOpen={isCategoryModalOpen}
                 onClose={onCloseCategoryManager}
             />
+
+            {/* Delete Account Modal */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+                    <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl p-6 animate-in fade-in zoom-in duration-200">
+                        <h3 className="text-lg font-bold text-white mb-2">Supprimer le compte ?</h3>
+                        <p className="text-slate-400 text-sm mb-6">
+                            Cette action est irréversible. Toutes vos données (souvenirs, catégories) seront définitivement effacées.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={async () => {
+                                    setIsDeleting(true);
+                                    try {
+                                        const { error } = await supabase.rpc('delete_user');
+                                        if (error) {
+                                            console.error('Error deleting account:', error);
+                                            alert('Erreur : ' + error.message);
+                                            setIsDeleting(false);
+                                        } else {
+                                            await signOut();
+                                            // Redirect or handled by auth state change
+                                        }
+                                    } catch (err) {
+                                        console.error('Unexpected error:', err);
+                                        setIsDeleting(false);
+                                    }
+                                }}
+                                disabled={isDeleting}
+                                className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-medium py-3 rounded-xl transition-all shadow-lg shadow-red-600/20"
+                            >
+                                {isDeleting ? 'Suppression en cours...' : 'Oui, supprimer mon compte'}
+                            </button>
+                            <button
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                disabled={isDeleting}
+                                className="w-full bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-300 font-medium py-3 rounded-xl transition-all"
+                            >
+                                Annuler
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
