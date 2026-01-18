@@ -54,7 +54,7 @@ const Layout: React.FC<LayoutProps> = ({
                         Life Tracer
                     </Link>
 
-                    <div className="hidden md:flex gap-1 justify-center">
+                    <div className="hidden md:flex items-center gap-1 justify-center overflow-x-auto no-scrollbar max-w-[40vw]">
                         {navItems.map((item) => {
                             const isActive = location.pathname === item.path;
                             const Icon = item.icon;
@@ -63,7 +63,7 @@ const Layout: React.FC<LayoutProps> = ({
                                 <Link
                                     key={item.path}
                                     to={item.path}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${isActive
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${isActive
                                         ? 'bg-white/10 text-white shadow-lg shadow-white/5'
                                         : 'text-slate-400 hover:text-white hover:bg-white/5'
                                         }`}
@@ -73,21 +73,23 @@ const Layout: React.FC<LayoutProps> = ({
                                 </Link>
                             );
                         })}
+                        <div className="w-px h-6 bg-slate-800 mx-2" />
                         <button
                             onClick={onOpenCategoryManager}
-                            className="p-2 hover:bg-white/5 rounded-full text-slate-500 hover:text-slate-300 transition-all ml-1"
+                            className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-indigo-300 border border-slate-700/50 hover:border-indigo-500/30 whitespace-nowrap"
                             title="Gérer les catégories"
                         >
                             <Settings className="w-4 h-4" />
+                            Gérer catégories
                         </button>
                     </div>
 
                     {/* Right Side Actions */}
-                    <div className="flex items-center gap-4 justify-self-end">
+                    <div className="flex items-center gap-4 justify-self-end flex-shrink-0 ml-auto">
 
                         {/* Zoom Control */}
                         {location.pathname !== '/global' && (
-                            <div className="hidden sm:flex items-center gap-3 bg-slate-900/50 p-1.5 rounded-lg border border-white/10 pr-3">
+                            <div className="hidden xl:flex items-center gap-3 bg-slate-900/50 p-1.5 rounded-lg border border-white/10 pr-3">
                                 <span className="text-[10px] text-slate-400 font-mono tracking-wider ml-1">ZOOM</span>
                                 <input
                                     type="range"
@@ -108,14 +110,14 @@ const Layout: React.FC<LayoutProps> = ({
                         <button
                             onClick={categories.length > 0 ? onOpenAddModal : undefined}
                             disabled={categories.length === 0}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-lg ${categories.length === 0
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-lg whitespace-nowrap ${categories.length === 0
                                 ? 'bg-slate-800 text-slate-500 cursor-not-allowed shadow-none'
                                 : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/20 active:scale-95'
                                 }`}
                             title={categories.length === 0 ? "Créez d'abord une catégorie" : "Ajouter un souvenir"}
                         >
                             <Plus className="w-4 h-4" />
-                            <span className="hidden sm:inline">Ajouter</span>
+                            <span className="hidden sm:inline">Gérer souvenirs</span>
                         </button>
 
                         {/* User & Dropdown */}
