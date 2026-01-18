@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Trash2, Edit2, Check, Palette, AlertTriangle } from 'lucide-react';
 import { useLifeStore } from '../store/useLifeStore';
-import { AVAILABLE_COLORS } from '../types';
+import { AVAILABLE_COLORS, getCategoryIcon } from '../types';
 import type { Category } from '../types';
 
 interface CategoryManagerModalProps {
@@ -19,6 +19,7 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({ isOpen, onC
     const [editingId, setEditingId] = useState<string | null>(null);
     const [name, setName] = useState('');
     const [selectedColor, setSelectedColor] = useState('indigo');
+    const [selectedIcon, setSelectedIcon] = useState('heart');
     const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -26,15 +27,16 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({ isOpen, onC
 
     const handleAdd = async () => {
         if (!name.trim()) return;
-        await addCategory({ name: name.trim(), color: selectedColor });
+        await addCategory({ name: name.trim(), color: selectedColor, icon: selectedIcon });
         setName('');
         setSelectedColor('indigo');
+        setSelectedIcon('heart');
         setIsAdding(false);
     };
 
     const handleUpdate = async (id: string) => {
         if (!name.trim()) return;
-        await updateCategory(id, { name: name.trim(), color: selectedColor });
+        await updateCategory(id, { name: name.trim(), color: selectedColor, icon: selectedIcon });
         setEditingId(null);
         setName('');
     };
@@ -43,6 +45,7 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({ isOpen, onC
         setEditingId(cat.id);
         setName(cat.name);
         setSelectedColor(cat.color);
+        setSelectedIcon(cat.icon || 'heart');
         setIsAdding(false);
     };
 
@@ -51,6 +54,7 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({ isOpen, onC
         setEditingId(null);
         setName('');
         setSelectedColor('indigo');
+        setSelectedIcon('heart');
     };
 
     const handleConfirmDelete = async () => {
@@ -196,8 +200,13 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({ isOpen, onC
                                     className="group flex items-center justify-between p-4 bg-slate-800/30 hover:bg-slate-800/50 rounded-2xl border border-slate-800 transition-all"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-3 h-3 rounded-full ${AVAILABLE_COLORS.find(c => c.name === cat.color)?.class || 'bg-indigo-500'
-                                            }`} />
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${AVAILABLE_COLORS.find(c => c.name === cat.color)?.class || 'bg-indigo-500'
+                                            }`}>
+                                            {(() => {
+                                                const Icon = getCategoryIcon(cat.icon);
+                                                return <Icon className="w-4 h-4 text-white" />;
+                                            })()}
+                                        </div>
                                         <span className="font-medium text-slate-200">{cat.name}</span>
                                     </div>
 

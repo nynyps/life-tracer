@@ -4,6 +4,7 @@ import EventCard from './EventCard';
 import { useLifeStore } from '../store/useLifeStore';
 import { toHE } from '../utils/dateUtils';
 import { Plus } from 'lucide-react';
+import { getCategoryIcon } from '../types';
 
 interface TimelineProps {
     events: LifeEvent[];
@@ -82,11 +83,7 @@ const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleI
         return (
             <div className="flex flex-col items-center justify-center py-20 md:py-40 px-4 text-center">
                 <div className="bg-slate-900/50 border border-slate-800 p-10 rounded-3xl max-w-md backdrop-blur-sm">
-                    <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-indigo-500/10 flex items-center justify-center">
-                        <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                    </div>
+
                     <p className="text-xl font-medium mb-3 text-slate-200">Aucun souvenir pour le moment</p>
                     <p className="text-sm text-slate-400 mb-6">Cliquez sur le bouton ci-dessous pour créer votre premier souvenir et commencer à tracer votre vie.</p>
                     {onOpenAddModal && (
@@ -114,11 +111,15 @@ const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleI
                         style={{ gridTemplateColumns: `80px repeat(${displayCategories.length}, 1fr)` }}
                     >
                         <div className="text-right pr-4 text-xs font-mono text-slate-500 pt-1">ANNÉE</div>
-                        {displayCategories.map((cat) => (
-                            <div key={cat.id} className="px-4 text-sm font-bold uppercase tracking-widest opacity-80 text-center border-l border-slate-800/50">
-                                {cat.name}
-                            </div>
-                        ))}
+                        {displayCategories.map((cat) => {
+                            const Icon = getCategoryIcon(cat.icon);
+                            return (
+                                <div key={cat.id} className="px-4 text-sm font-bold uppercase tracking-widest opacity-80 text-center border-l border-slate-800/50 flex flex-col items-center gap-1">
+                                    <Icon className="w-4 h-4 opacity-70" />
+                                    {cat.name}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -164,13 +165,41 @@ const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleI
                                         className="absolute left-2 right-2 z-10"
                                         style={{ top: getPosition(event.date) }}
                                     >
-                                        <div className="transform scale-95 origin-top-left hover:scale-100 transition-all z-20 hover:z-30 hover:shadow-2xl">
-                                            <EventCard
-                                                event={event}
-                                                onEdit={onEdit}
-                                                onDelete={onDelete}
-                                                onToggleImportant={onToggleImportant}
-                                            />
+                                        <div className="relative group">
+                                            {/* Duration Bar Visual (Only visible on hover if endDate exists) */}
+                                            {event.endDate && (
+                                                <div
+                                                    className="absolute left-[calc(50%-1px)] top-[2rem] w-0.5 bg-indigo-500/50 opacity-0 group-hover:opacity-100 transition-opacity z-0 pointer-events-none"
+                                                    style={{
+                                                        height: Math.max(0, (new Date(event.endDate).getTime() - new Date(event.date).getTime()) / (1000 * 3600 * 24) * pixelsPerYear / 365),
+                                                    }}
+                                                >
+                                                    {/* Duration Label */}
+                                                    <div className="absolute top-[50%] left-2 bg-slate-900 text-xs text-indigo-300 px-2 py-1 rounded border border-indigo-500/30 whitespace-nowrap transform -translate-y-1/2">
+                                                        {(() => {
+                                                            const start = new Date(event.date);
+                                                            const end = new Date(event.endDate);
+                                                            const diffTime = Math.abs(end.getTime() - start.getTime());
+                                                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                                            if (diffDays < 30) return `${diffDays} jours`;
+                                                            if (diffDays < 365) return `${Math.floor(diffDays / 30)} mois`;
+                                                            const years = Math.floor(diffDays / 365);
+                                                            const months = Math.floor((diffDays % 365) / 30);
+                                                            return months > 0 ? `${years} ans ${months} mois` : `${years} ans`;
+                                                        })()}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className="transform scale-95 origin-top-left hover:scale-100 transition-all z-20 hover:z-30 hover:shadow-2xl relative">
+                                                <EventCard
+                                                    event={event}
+                                                    onEdit={onEdit}
+                                                    onDelete={onDelete}
+                                                    onToggleImportant={onToggleImportant}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 ))

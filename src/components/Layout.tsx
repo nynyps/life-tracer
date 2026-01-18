@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Layers, Heart, Plus, Activity, LogOut, Settings, User, KeyRound, Trash2 } from 'lucide-react';
+import { Layers, Plus, Activity, LogOut, Settings, User, KeyRound, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useLifeStore } from '../store/useLifeStore';
 import CategoryManagerModal from './CategoryManagerModal';
+import { getCategoryIcon } from '../types';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -36,7 +37,7 @@ const Layout: React.FC<LayoutProps> = ({
         ...categories.map(cat => ({
             path: `/category/${cat.id}`,
             label: cat.name,
-            icon: Heart,
+            icon: getCategoryIcon(cat.icon),
             color: cat.color
         })),
         { path: '/global', label: 'Vue Globale', icon: Activity },

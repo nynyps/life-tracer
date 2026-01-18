@@ -19,6 +19,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
     const [formData, setFormData] = useState({
         title: '',
         date: new Date().toISOString().split('T')[0],
+        endDate: '',
         categoryId: categories[0]?.id || '',
         description: '',
         location: '',
@@ -32,6 +33,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                 setFormData({
                     title: initialData.title,
                     date: initialData.date,
+                    endDate: initialData.endDate || '',
                     categoryId: initialData.categoryId,
                     description: initialData.description || '',
                     location: initialData.location || '',
@@ -42,6 +44,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                 setFormData({
                     title: '',
                     date: new Date().toISOString().split('T')[0],
+                    endDate: '',
                     categoryId: categories[0]?.id || '',
                     description: '',
                     location: '',
@@ -123,7 +126,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                             <div className="grid grid-cols-2 gap-4">
                                 {/* Date Input */}
                                 <div className="space-y-2">
-                                    <label className="text-xs font-medium uppercase tracking-wider text-slate-400">Date</label>
+                                    <label className="text-xs font-medium uppercase tracking-wider text-slate-400">Date de début</label>
                                     <div className="relative">
                                         <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                                         <input
@@ -131,6 +134,20 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                                             required
                                             value={formData.date}
                                             onChange={e => setFormData({ ...formData, date: e.target.value })}
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all [color-scheme:dark]"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* End Date Input (Optional) */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-medium uppercase tracking-wider text-slate-400">Date de fin (Optionnel)</label>
+                                    <div className="relative">
+                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                        <input
+                                            type="date"
+                                            value={formData.endDate || ''}
+                                            onChange={e => setFormData({ ...formData, endDate: e.target.value })}
                                             className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all [color-scheme:dark]"
                                         />
                                     </div>

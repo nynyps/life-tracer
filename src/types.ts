@@ -2,6 +2,7 @@ export interface Category {
     id: string;
     name: string;
     color: string; // Tailwind color name like 'rose', 'emerald', 'indigo' or hex
+    icon?: string; // Icon name
     userId: string;
 }
 
@@ -38,7 +39,31 @@ export const AVAILABLE_COLORS = [
     { name: 'emerald', label: 'Vert', class: 'bg-emerald-500' },
     { name: 'blue', label: 'Bleu', class: 'bg-blue-500' },
     { name: 'amber', label: 'Ambre', class: 'bg-amber-500' },
-    { name: 'violet', label: 'Violet', class: 'bg-violet-500' },
     { name: 'cyan', label: 'Cyan', class: 'bg-cyan-500' },
     { name: 'indigo', label: 'Indigo', class: 'bg-indigo-500' },
 ];
+
+import { Heart, Briefcase, Globe, Home, GraduationCap, Dumbbell, Music, Camera, Star, Users, Leaf, Car, Lightbulb, Palette, Coffee } from 'lucide-react';
+
+export const CATEGORY_ICONS: Record<string, any> = {
+    heart: Heart,
+    briefcase: Briefcase,
+    globe: Globe,
+    home: Home,
+    graduation: GraduationCap,
+    dumbbell: Dumbbell,
+    music: Music,
+    camera: Camera,
+    star: Star,
+    users: Users,
+    leaf: Leaf,
+    car: Car,
+    lightbulb: Lightbulb,
+    palette: Palette,
+    coffee: Coffee,
+};
+
+export const getCategoryIcon = (iconName?: string) => {
+    if (!iconName) return Heart;
+    return CATEGORY_ICONS[iconName] || Heart;
+};
