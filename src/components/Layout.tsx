@@ -54,29 +54,31 @@ const Layout: React.FC<LayoutProps> = ({
                         Life Tracer
                     </Link>
 
-                    <div className="hidden md:flex items-center gap-1 justify-center overflow-x-auto no-scrollbar max-w-[40vw]">
-                        {navItems.map((item) => {
-                            const isActive = location.pathname === item.path;
-                            const Icon = item.icon;
+                    <div className="hidden md:flex items-center gap-2 justify-center">
+                        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-[30vw] xl:max-w-[40vw] pr-2">
+                            {navItems.map((item) => {
+                                const isActive = location.pathname === item.path;
+                                const Icon = item.icon;
 
-                            return (
-                                <Link
-                                    key={item.path}
-                                    to={item.path}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${isActive
-                                        ? 'bg-white/10 text-white shadow-lg shadow-white/5'
-                                        : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                        }`}
-                                >
-                                    <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-400' : ''}`} />
-                                    {item.label}
-                                </Link>
-                            );
-                        })}
-                        <div className="w-px h-6 bg-slate-800 mx-2" />
+                                return (
+                                    <Link
+                                        key={item.path}
+                                        to={item.path}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${isActive
+                                            ? 'bg-white/10 text-white shadow-lg shadow-white/5'
+                                            : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                            }`}
+                                    >
+                                        <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-400' : ''}`} />
+                                        {item.label}
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                        <div className="w-px h-6 bg-slate-800 mx-1 flex-shrink-0" />
                         <button
                             onClick={onOpenCategoryManager}
-                            className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-lg whitespace-nowrap bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/20 active:scale-95"
+                            className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-lg whitespace-nowrap bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/20 active:scale-95 flex-shrink-0"
                             title="Gérer les catégories"
                         >
                             <Settings className="w-4 h-4" />
