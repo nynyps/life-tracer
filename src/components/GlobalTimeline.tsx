@@ -135,140 +135,142 @@ const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
                 })}
             </div >
 
-            <div className="w-full max-w-[1400px] flex flex-col gap-20 px-12 pb-24 pt-8 relative">
-                {rows.map((row: any, rowIndex: number) => {
-                    const isReverse = rowIndex % 2 !== 0;
+            <div className="w-full overflow-x-auto pb-4 custom-scrollbar">
+                <div className="min-w-[1200px] max-w-[1400px] flex flex-col gap-20 px-4 md:px-12 pb-24 pt-8 relative mx-auto">
+                    {rows.map((row: any, rowIndex: number) => {
+                        const isReverse = rowIndex % 2 !== 0;
 
-                    // Filter events for this row
-                    const rowEvents = events.filter(e => {
-                        const y = new Date(e.date).getFullYear();
-                        return y >= row.startYear && y < row.endYear;
-                    }).filter(e => selectedCategoryIds.includes(e.categoryId));
+                        // Filter events for this row
+                        const rowEvents = events.filter(e => {
+                            const y = new Date(e.date).getFullYear();
+                            return y >= row.startYear && y < row.endYear;
+                        }).filter(e => selectedCategoryIds.includes(e.categoryId));
 
-                    return (
-                        <div key={row.index} className="relative w-full h-40">
-                            {/* Connector Lines */}
-                            {/* Right Connector (Row 0 -> 1, 2 -> 3) */}
-                            {!isReverse && rowIndex < rows.length - 1 && (
-                                <div className="absolute right-[-24px] top-1/2 w-16 h-[calc(100%+80px)] border-r-4 border-slate-700/30 rounded-r-[50px] border-t-4 border-b-4 border-t-transparent border-b-transparent pointer-events-none" />
-                            )}
-                            {/* Left Connector (Row 1 -> 2, 3 -> 4) */}
-                            {isReverse && rowIndex < rows.length - 1 && (
-                                <div className="absolute left-[-24px] top-1/2 w-16 h-[calc(100%+80px)] border-l-4 border-slate-700/30 rounded-l-[50px] border-t-4 border-b-4 border-t-transparent border-b-transparent pointer-events-none" />
-                            )}
+                        return (
+                            <div key={row.index} className="relative w-full h-40">
+                                {/* Connector Lines */}
+                                {/* Right Connector (Row 0 -> 1, 2 -> 3) */}
+                                {!isReverse && rowIndex < rows.length - 1 && (
+                                    <div className="absolute right-[-24px] top-1/2 w-16 h-[calc(100%+80px)] border-r-4 border-slate-700/30 rounded-r-[50px] border-t-4 border-b-4 border-t-transparent border-b-transparent pointer-events-none" />
+                                )}
+                                {/* Left Connector (Row 1 -> 2, 3 -> 4) */}
+                                {isReverse && rowIndex < rows.length - 1 && (
+                                    <div className="absolute left-[-24px] top-1/2 w-16 h-[calc(100%+80px)] border-l-4 border-slate-700/30 rounded-l-[50px] border-t-4 border-b-4 border-t-transparent border-b-transparent pointer-events-none" />
+                                )}
 
-                            {/* Main Axis Line */}
-                            <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-1.5 bg-slate-700/60 rounded-full" />
+                                {/* Main Axis Line */}
+                                <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-1.5 bg-slate-700/60 rounded-full" />
 
-                            {/* Year Markers */}
-                            {Array.from({ length: YEARS_PER_ROW + 1 }).map((_, i) => {
-                                const year = row.startYear + i;
-                                const percent = (i / YEARS_PER_ROW) * 100;
-                                const displayPercent = isReverse ? 100 - percent : percent;
+                                {/* Year Markers */}
+                                {Array.from({ length: YEARS_PER_ROW + 1 }).map((_, i) => {
+                                    const year = row.startYear + i;
+                                    const percent = (i / YEARS_PER_ROW) * 100;
+                                    const displayPercent = isReverse ? 100 - percent : percent;
 
-                                // Determine marker prominence
-                                const isFirstOrLast = i === 0 || i === YEARS_PER_ROW;
-                                const isFiveYear = i % 5 === 0;
+                                    // Determine marker prominence
+                                    const isFirstOrLast = i === 0 || i === YEARS_PER_ROW;
+                                    const isFiveYear = i % 5 === 0;
 
-                                // Styling tiers
-                                let markerHeight = 'h-3';
-                                let textClass = 'text-[10px] text-slate-500';
+                                    // Styling tiers
+                                    let markerHeight = 'h-3';
+                                    let textClass = 'text-[10px] text-slate-500';
 
-                                if (isFirstOrLast) {
-                                    markerHeight = 'h-8';
-                                    textClass = 'text-sm text-slate-200 font-bold';
-                                } else if (isFiveYear) {
-                                    markerHeight = 'h-5';
-                                    textClass = 'text-xs text-slate-400';
-                                }
+                                    if (isFirstOrLast) {
+                                        markerHeight = 'h-8';
+                                        textClass = 'text-sm text-slate-200 font-bold';
+                                    } else if (isFiveYear) {
+                                        markerHeight = 'h-5';
+                                        textClass = 'text-xs text-slate-400';
+                                    }
 
-                                return (
-                                    <div
-                                        key={year}
-                                        className="absolute top-1/2 -translate-y-1/2 group"
-                                        style={{ left: `${displayPercent}%` }}
-                                    >
-                                        <div className={`${markerHeight} w-1 bg-slate-600/60`} />
-                                        <div className={`absolute top-8 left-1/2 -translate-x-1/2 font-mono ${textClass} group-hover:text-slate-200 transition-colors`}>
-                                            {toHE(year)}
+                                    return (
+                                        <div
+                                            key={year}
+                                            className="absolute top-1/2 -translate-y-1/2 group"
+                                            style={{ left: `${displayPercent}%` }}
+                                        >
+                                            <div className={`${markerHeight} w-1 bg-slate-600/60`} />
+                                            <div className={`absolute top-8 left-1/2 -translate-x-1/2 font-mono ${textClass} group-hover:text-slate-200 transition-colors`}>
+                                                {toHE(year)}
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
 
-                            {/* Events */}
-                            {rowEvents.map((event) => {
-                                const category = categories.find(c => c.id === event.categoryId);
-                                const colorData = AVAILABLE_COLORS.find(c => c.name === category?.color);
-                                const dotColor = colorData?.class || 'bg-indigo-500';
-                                const shadowColor = category?.color === 'rose' ? 'shadow-rose-500/50' :
-                                    category?.color === 'emerald' ? 'shadow-emerald-500/50' :
-                                        category?.color === 'blue' ? 'shadow-blue-500/50' :
-                                            category?.color === 'amber' ? 'shadow-amber-500/50' :
-                                                category?.color === 'violet' ? 'shadow-violet-500/50' :
-                                                    category?.color === 'cyan' ? 'shadow-cyan-500/50' : 'shadow-indigo-500/50';
+                                {/* Events */}
+                                {rowEvents.map((event) => {
+                                    const category = categories.find(c => c.id === event.categoryId);
+                                    const colorData = AVAILABLE_COLORS.find(c => c.name === category?.color);
+                                    const dotColor = colorData?.class || 'bg-indigo-500';
+                                    const shadowColor = category?.color === 'rose' ? 'shadow-rose-500/50' :
+                                        category?.color === 'emerald' ? 'shadow-emerald-500/50' :
+                                            category?.color === 'blue' ? 'shadow-blue-500/50' :
+                                                category?.color === 'amber' ? 'shadow-amber-500/50' :
+                                                    category?.color === 'violet' ? 'shadow-violet-500/50' :
+                                                        category?.color === 'cyan' ? 'shadow-cyan-500/50' : 'shadow-indigo-500/50';
 
-                                const left = getPositionPercent(event.date, row.startYear, isReverse);
+                                    const left = getPositionPercent(event.date, row.startYear, isReverse);
 
-                                // Tooltip positioning logic
-                                let tooltipAlignClass = "left-1/2 -translate-x-1/2 origin-bottom";
-                                let arrowAlignClass = "left-1/2 -translate-x-1/2";
-                                if (left < 10) {
-                                    tooltipAlignClass = "left-0 origin-bottom-left";
-                                    arrowAlignClass = "left-4";
-                                } else if (left > 90) {
-                                    tooltipAlignClass = "right-0 left-auto origin-bottom-right";
-                                    arrowAlignClass = "right-4 left-auto";
-                                }
+                                    // Tooltip positioning logic
+                                    let tooltipAlignClass = "left-1/2 -translate-x-1/2 origin-bottom";
+                                    let arrowAlignClass = "left-1/2 -translate-x-1/2";
+                                    if (left < 10) {
+                                        tooltipAlignClass = "left-0 origin-bottom-left";
+                                        arrowAlignClass = "left-4";
+                                    } else if (left > 90) {
+                                        tooltipAlignClass = "right-0 left-auto origin-bottom-right";
+                                        arrowAlignClass = "right-4 left-auto";
+                                    }
 
-                                return (
-                                    <div
-                                        key={event.id}
-                                        className="absolute top-1/2 -translate-y-1/2 group z-10"
-                                        style={{ left: `${left}%` }}
-                                    >
-                                        {/* Super Souvenir Title */}
-                                        {event.isImportant && (
+                                    return (
+                                        <div
+                                            key={event.id}
+                                            className="absolute top-1/2 -translate-y-1/2 group z-10"
+                                            style={{ left: `${left}%` }}
+                                        >
+                                            {/* Super Souvenir Title */}
+                                            {event.isImportant && (
+                                                <div
+                                                    onClick={(e) => { e.stopPropagation(); navigate(`/category/${category?.id}#event-${event.id}`); }}
+                                                    className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-slate-200 bg-slate-900/90 px-2 py-1 rounded-md border border-slate-700/50 cursor-pointer hover:bg-slate-800 transition-colors">
+                                                    {event.title}
+                                                </div>
+                                            )}
+
+                                            {/* Trigger Area */}
                                             <div
-                                                onClick={(e) => { e.stopPropagation(); navigate(`/category/${category?.id}#event-${event.id}`); }}
-                                                className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-slate-200 bg-slate-900/90 px-2 py-1 rounded-md border border-slate-700/50 cursor-pointer hover:bg-slate-800 transition-colors">
-                                                {event.title}
-                                            </div>
-                                        )}
+                                                onClick={() => navigate(`/category/${category?.id}#event-${event.id}`)}
+                                                className={`${event.isImportant
+                                                    ? `w-1.5 h-14 -mt-5 ${dotColor} ${shadowColor} shadow-xl border border-white/30`
+                                                    : `w-5 h-5 rounded-full ${dotColor} ${shadowColor} border-2 border-slate-900 shadow-lg`
+                                                    } cursor-pointer transform transition-all group-hover:scale-150 group-hover:z-50`}
+                                            />
 
-                                        {/* Trigger Area */}
-                                        <div
-                                            onClick={() => navigate(`/category/${category?.id}#event-${event.id}`)}
-                                            className={`${event.isImportant
-                                                ? `w-1.5 h-14 -mt-5 ${dotColor} ${shadowColor} shadow-xl border border-white/30`
-                                                : `w-5 h-5 rounded-full ${dotColor} ${shadowColor} border-2 border-slate-900 shadow-lg`
-                                                } cursor-pointer transform transition-all group-hover:scale-150 group-hover:z-50`}
-                                        />
-
-                                        {/* Tooltip */}
-                                        <div
-                                            onClick={() => navigate(`/category/${category?.id}#event-${event.id}`)}
-                                            className={`absolute bottom-full mb-4 hidden group-hover:block z-50 w-64 ${tooltipAlignClass} cursor-pointer`}>
-                                            <div className="bg-slate-800/90 backdrop-blur-md p-3 rounded-lg border border-slate-700 shadow-2xl text-left animate-in fade-in zoom-in-95 duration-200">
-                                                <div className={`h-1 w-full mb-2 rounded-full ${dotColor.split(' ')[0]}`} />
-                                                <h3 className="font-bold text-slate-100 text-sm mb-1">{event.title}</h3>
-                                                <div className="flex items-center gap-2 text-xs text-slate-400 mb-1">
-                                                    <Calendar className="w-3 h-3" />
-                                                    <span>{formatHEDate(event.date)}</span>
+                                            {/* Tooltip */}
+                                            <div
+                                                onClick={() => navigate(`/category/${category?.id}#event-${event.id}`)}
+                                                className={`absolute bottom-full mb-4 hidden group-hover:block z-50 w-64 ${tooltipAlignClass} cursor-pointer`}>
+                                                <div className="bg-slate-800/90 backdrop-blur-md p-3 rounded-lg border border-slate-700 shadow-2xl text-left animate-in fade-in zoom-in-95 duration-200">
+                                                    <div className={`h-1 w-full mb-2 rounded-full ${dotColor.split(' ')[0]}`} />
+                                                    <h3 className="font-bold text-slate-100 text-sm mb-1">{event.title}</h3>
+                                                    <div className="flex items-center gap-2 text-xs text-slate-400 mb-1">
+                                                        <Calendar className="w-3 h-3" />
+                                                        <span>{formatHEDate(event.date)}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                                                        <Tag className="w-3 h-3" />
+                                                        <span className="uppercase">{category?.name || 'Sans catégorie'}</span>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-2 text-xs text-slate-400">
-                                                    <Tag className="w-3 h-3" />
-                                                    <span className="uppercase">{category?.name || 'Sans catégorie'}</span>
-                                                </div>
+                                                <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-slate-800 absolute -bottom-1.5 opacity-90 ${arrowAlignClass}`}></div>
                                             </div>
-                                            <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-slate-800 absolute -bottom-1.5 opacity-90 ${arrowAlignClass}`}></div>
                                         </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    );
-                })}
+                                    );
+                                })}
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </div >
     );

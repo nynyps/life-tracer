@@ -59,7 +59,7 @@ const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleI
     // Empty State: No Categories
     if (displayCategories.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-40 opacity-50 px-4 text-center">
+            <div className="flex flex-col items-center justify-center py-20 md:py-40 opacity-50 px-4 text-center">
                 <div className="bg-slate-900 border border-slate-800 p-10 rounded-3xl max-w-md flex flex-col items-center">
                     <p className="text-xl font-medium mb-4 text-slate-200">Commencez par créer une catégorie</p>
                     <p className="text-sm text-slate-400 mb-6">Cliquez sur l'icône de paramètres dans la barre de navigation pour organiser vos souvenirs par colonnes.</p>
@@ -80,7 +80,7 @@ const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleI
     // Empty State: Categories exist but no events
     if (!hasVisibleEvents) {
         return (
-            <div className="flex flex-col items-center justify-center py-40 px-4 text-center">
+            <div className="flex flex-col items-center justify-center py-20 md:py-40 px-4 text-center">
                 <div className="bg-slate-900/50 border border-slate-800 p-10 rounded-3xl max-w-md backdrop-blur-sm">
                     <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-indigo-500/10 flex items-center justify-center">
                         <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

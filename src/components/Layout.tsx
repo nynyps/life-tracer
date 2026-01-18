@@ -48,7 +48,7 @@ const Layout: React.FC<LayoutProps> = ({
 
             {/* Navbar */}
             <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-slate-950/80 backdrop-blur-md">
-                <div className="max-w-[1920px] mx-auto px-6 h-16 flex md:grid md:grid-cols-[1fr_auto_1fr] items-center justify-between">
+                <div className="max-w-[1920px] mx-auto px-4 md:px-6 h-16 flex md:grid md:grid-cols-[1fr_auto_1fr] items-center justify-between">
                     <Link to="/" className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent justify-self-start">
                         Life Tracer
                     </Link>
@@ -188,7 +188,7 @@ const Layout: React.FC<LayoutProps> = ({
                 </div>
             </div>
 
-            <main className="relative z-10 pt-24 pb-24 px-6 max-w-[1920px] mx-auto">
+            <main className="relative z-10 pt-20 md:pt-24 pb-24 px-4 md:px-6 max-w-[1920px] mx-auto">
                 {children}
             </main>
 

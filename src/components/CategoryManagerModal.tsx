@@ -102,7 +102,7 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({ isOpen, onC
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
                 <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
                     {/* Header */}
-                    <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                    <div className="px-4 md:px-6 py-4 border-b border-slate-800 flex items-center justify-between">
                         <h2 className="text-xl font-semibold text-slate-100 flex items-center gap-2">
                             <Palette className="w-5 h-5 text-indigo-400" />
                             Gérer les catégories
@@ -113,7 +113,7 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({ isOpen, onC
                     </div>
 
                     {/* Content */}
-                    <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+                    <div className="p-4 md:p-6 space-y-6 max-h-[70vh] overflow-y-auto">
                         {/* Add New Button */}
                         {!isAdding && !editingId && (
                             <button

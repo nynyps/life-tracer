@@ -89,7 +89,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                         className="relative w-full max-w-lg bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden"
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-slate-700">
+                        <div className="flex items-center justify-between p-4 md:p-6 border-b border-slate-700">
                             <h2 className="text-xl font-bold text-white">
                                 {initialData ? 'Modifier le souvenir' : 'Ajouter un souvenir'}
                             </h2>
@@ -102,7 +102,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                         </div>
 
                         {/* Form */}
-                        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
+                        <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
 
                             {/* Title Input */}
                             <div className="space-y-2">
