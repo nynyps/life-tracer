@@ -13,6 +13,7 @@ interface GlobalTimelineProps {
 const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
     const categories = useLifeStore((state) => state.categories);
     const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+    const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
     const navigate = useNavigate();
 
     // Initialize selection if categories exist
@@ -223,66 +224,87 @@ const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
                                     }
 
                                     return (
-                                        <div
-                                            key={event.id}
-                                            className="absolute top-1/2 -translate-y-1/2 group z-10"
-                                            style={{ left: `${left}%` }}
-                                        >
-                                            {/* Super Souvenir Title */}
-                                            {event.isImportant && (
+                                        <React.Fragment key={event.id}>
+                                            {/* Duration Line Visualization */}
+                                            {hoveredEventId === event.id && event.endDate && (
                                                 <div
-                                                    onClick={(e) => { e.stopPropagation(); navigate(`/category/${category?.id}#event-${event.id}`); }}
-                                                    className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-slate-200 bg-slate-900/90 px-2 py-1 rounded-md border border-slate-700/50 cursor-pointer hover:bg-slate-800 transition-colors">
-                                                    {event.title}
-                                                </div>
+                                                    className={`absolute top-1/2 -translate-y-1/2 h-1.5 rounded-full ${dotColor} opacity-50 pointer-events-none z-0 transition-opacity duration-300`}
+                                                    style={{
+                                                        left: `${Math.min(
+                                                            getPositionPercent(event.date, row.startYear, isReverse),
+                                                            getPositionPercent(event.endDate, row.startYear, isReverse)
+                                                        )}%`,
+                                                        width: `${Math.abs(
+                                                            getPositionPercent(event.date, row.startYear, isReverse) -
+                                                            getPositionPercent(event.endDate, row.startYear, isReverse)
+                                                        )}%`
+                                                    }}
+                                                />
                                             )}
 
-                                            {/* Trigger Area */}
                                             <div
-                                                onClick={() => navigate(`/category/${category?.id}#event-${event.id}`)}
-                                                className={`${event.isImportant
-                                                    ? `w-1.5 h-14 -mt-5 ${dotColor} ${shadowColor} shadow-xl border border-white/30`
-                                                    : `w-5 h-5 rounded-full ${dotColor} ${shadowColor} border-2 border-slate-900 shadow-lg`
-                                                    } cursor-pointer transform transition-all group-hover:scale-150 group-hover:z-50`}
-                                            />
-
-                                            {/* Tooltip */}
-                                            <div
-                                                onClick={() => navigate(`/category/${category?.id}#event-${event.id}`)}
-                                                className={`absolute bottom-full mb-4 hidden group-hover:block z-50 w-64 ${tooltipAlignClass} cursor-pointer`}>
-                                                <div className="bg-slate-800/90 backdrop-blur-md p-3 rounded-lg border border-slate-700 shadow-2xl text-left animate-in fade-in zoom-in-95 duration-200">
-                                                    <div className={`h-1 w-full mb-2 rounded-full ${dotColor.split(' ')[0]}`} />
-                                                    <h3 className="font-bold text-slate-100 text-sm mb-1">{event.title}</h3>
-                                                    <div className="flex items-center gap-2 text-xs text-slate-400 mb-1">
-                                                        <Calendar className="w-3 h-3" />
-                                                        <span>{formatHEDate(event.date)}</span>
-                                                        {event.endDate && (
-                                                            <span className="text-slate-500">
-                                                                - {(() => {
-                                                                    const start = new Date(event.date);
-                                                                    const end = new Date(event.endDate);
-                                                                    const diffTime = Math.abs(end.getTime() - start.getTime());
-                                                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                                                                    if (diffDays < 30) return `${diffDays} jours`;
-                                                                    if (diffDays < 365) return `${Math.floor(diffDays / 30)} mois`;
-                                                                    const years = Math.floor(diffDays / 365);
-                                                                    const months = Math.floor((diffDays % 365) / 30);
-                                                                    return months > 0 ? `${years} ans ${months} mois` : `${years} ans`;
-                                                                })()}
-                                                            </span>
-                                                        )}
+                                                onMouseEnter={() => setHoveredEventId(event.id)}
+                                                onMouseLeave={() => setHoveredEventId(null)}
+                                                className="absolute top-1/2 -translate-y-1/2 group z-10"
+                                                style={{ left: `${left}%` }}
+                                            >
+                                                {/* Super Souvenir Title */}
+                                                {event.isImportant && (
+                                                    <div
+                                                        onClick={(e) => { e.stopPropagation(); navigate(`/category/${category?.id}#event-${event.id}`); }}
+                                                        className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-slate-200 bg-slate-900/90 px-2 py-1 rounded-md border border-slate-700/50 cursor-pointer hover:bg-slate-800 transition-colors">
+                                                        {event.title}
                                                     </div>
-                                                    <div className="flex items-center gap-2 text-xs text-slate-400">
-                                                        <Tag className="w-3 h-3" />
-                                                        <span className="uppercase">{category?.name || 'Sans catégorie'}</span>
+                                                )}
+
+                                                {/* Trigger Area */}
+                                                <div
+                                                    onClick={() => navigate(`/category/${category?.id}#event-${event.id}`)}
+                                                    className={`${event.isImportant
+                                                        ? `w-1.5 h-14 -mt-5 ${dotColor} ${shadowColor} shadow-xl border border-white/30`
+                                                        : `w-5 h-5 rounded-full ${dotColor} ${shadowColor} border-2 border-slate-900 shadow-lg`
+                                                        } cursor-pointer transform transition-all group-hover:scale-150 group-hover:z-50`}
+                                                />
+
+                                                {/* Tooltip */}
+                                                <div
+                                                    onClick={() => navigate(`/category/${category?.id}#event-${event.id}`)}
+                                                    className={`absolute bottom-full mb-4 hidden group-hover:block z-50 w-64 ${tooltipAlignClass} cursor-pointer`}>
+                                                    <div className="bg-slate-800/90 backdrop-blur-md p-3 rounded-lg border border-slate-700 shadow-2xl text-left animate-in fade-in zoom-in-95 duration-200">
+                                                        <div className={`h-1 w-full mb-2 rounded-full ${dotColor.split(' ')[0]}`} />
+                                                        <h3 className="font-bold text-slate-100 text-sm mb-1">{event.title}</h3>
+                                                        <div className="flex items-center gap-2 text-xs text-slate-400 mb-1">
+                                                            <Calendar className="w-3 h-3" />
+                                                            <span>{formatHEDate(event.date)}</span>
+                                                            {event.endDate && (
+                                                                <span className="text-slate-500">
+                                                                    - {(() => {
+                                                                        const start = new Date(event.date);
+                                                                        const end = new Date(event.endDate);
+                                                                        const diffTime = Math.abs(end.getTime() - start.getTime());
+                                                                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                                                        if (diffDays < 30) return `${diffDays} jours`;
+                                                                        if (diffDays < 365) return `${Math.floor(diffDays / 30)} mois`;
+                                                                        const years = Math.floor(diffDays / 365);
+                                                                        const months = Math.floor((diffDays % 365) / 30);
+                                                                        return months > 0 ? `${years} ans ${months} mois` : `${years} ans`;
+                                                                    })()}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex items-center gap-2 text-xs text-slate-400">
+                                                            <Tag className="w-3 h-3" />
+                                                            <span className="uppercase">{category?.name || 'Sans catégorie'}</span>
+                                                        </div>
                                                     </div>
+                                                    <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-slate-800 absolute -bottom-1.5 opacity-90 ${arrowAlignClass}`}></div>
                                                 </div>
-                                                <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-slate-800 absolute -bottom-1.5 opacity-90 ${arrowAlignClass}`}></div>
                                             </div>
-                                        </div>
+                                        </React.Fragment>
                                     );
                                 })}
+                                {/* Duration Lines Layer (rendered separate or with events, here with events for easy map access, but careful with z-index) */}
                             </div>
                         );
                     })}

@@ -167,30 +167,7 @@ const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleI
                                     >
                                         <div className="relative group">
                                             {/* Duration Bar Visual (Only visible on hover if endDate exists) */}
-                                            {event.endDate && (
-                                                <div
-                                                    className="absolute left-[calc(50%-1px)] top-[2rem] w-0.5 bg-indigo-500/50 opacity-0 group-hover:opacity-100 transition-opacity z-0 pointer-events-none"
-                                                    style={{
-                                                        height: Math.max(0, (new Date(event.endDate).getTime() - new Date(event.date).getTime()) / (1000 * 3600 * 24) * pixelsPerYear / 365),
-                                                    }}
-                                                >
-                                                    {/* Duration Label */}
-                                                    <div className="absolute top-[50%] left-2 bg-slate-900 text-xs text-indigo-300 px-2 py-1 rounded border border-indigo-500/30 whitespace-nowrap transform -translate-y-1/2">
-                                                        {(() => {
-                                                            const start = new Date(event.date);
-                                                            const end = new Date(event.endDate);
-                                                            const diffTime = Math.abs(end.getTime() - start.getTime());
-                                                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                                                            if (diffDays < 30) return `${diffDays} jours`;
-                                                            if (diffDays < 365) return `${Math.floor(diffDays / 30)} mois`;
-                                                            const years = Math.floor(diffDays / 365);
-                                                            const months = Math.floor((diffDays % 365) / 30);
-                                                            return months > 0 ? `${years} ans ${months} mois` : `${years} ans`;
-                                                        })()}
-                                                    </div>
-                                                </div>
-                                            )}
 
                                             <div className="transform scale-95 origin-top-left hover:scale-100 transition-all z-20 hover:z-30 hover:shadow-2xl relative">
                                                 <EventCard

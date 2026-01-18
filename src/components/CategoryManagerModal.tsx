@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Trash2, Edit2, Check, Palette, AlertTriangle } from 'lucide-react';
 import { useLifeStore } from '../store/useLifeStore';
-import { AVAILABLE_COLORS, getCategoryIcon } from '../types';
+import { AVAILABLE_COLORS, getCategoryIcon, CATEGORY_ICONS } from '../types';
 import type { Category } from '../types';
 
 interface CategoryManagerModalProps {
@@ -167,6 +167,26 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({ isOpen, onC
                                     </div>
                                 </div>
 
+                                <div className="space-y-3">
+                                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                        Icône
+                                    </label>
+                                    <div className="flex flex-wrap gap-3 max-h-32 overflow-y-auto custom-scrollbar p-1">
+                                        {Object.entries(CATEGORY_ICONS).map(([key, Icon]) => (
+                                            <button
+                                                key={key}
+                                                onClick={() => setSelectedIcon(key)}
+                                                className={`w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center transition-all ${selectedIcon === key
+                                                    ? 'ring-2 ring-indigo-500 text-indigo-400 bg-indigo-500/10'
+                                                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                                                    }`}
+                                            >
+                                                <Icon className="w-5 h-5" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 <div className="flex gap-3 pt-2">
                                     <button
                                         onClick={editingId ? () => handleUpdate(editingId) : handleAdd}
@@ -236,7 +256,7 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({ isOpen, onC
                         </p>
                     </div>
                 </div>
-            </div>
+            </div >
         </>
     );
 };

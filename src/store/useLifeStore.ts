@@ -149,6 +149,7 @@ export const useLifeStore = create<LifeStore>()((set, get) => ({
             title: e.title,
             date: e.date,
             categoryId: e.category || '', // Map category from DB
+            endDate: e.end_date || undefined,
             description: e.description || undefined,
             location: e.location || undefined,
             people: e.people || undefined,
@@ -168,6 +169,7 @@ export const useLifeStore = create<LifeStore>()((set, get) => ({
                 user_id: user.id,
                 title: newEvent.title,
                 date: newEvent.date,
+                end_date: newEvent.endDate || null,
                 category: newEvent.categoryId,
                 description: newEvent.description || null,
                 location: newEvent.location || null,
@@ -187,6 +189,7 @@ export const useLifeStore = create<LifeStore>()((set, get) => ({
                 id: data.id,
                 title: data.title,
                 date: data.date,
+                endDate: data.end_date || undefined,
                 categoryId: data.category || '',
                 description: data.description || undefined,
                 location: data.location || undefined,
@@ -205,6 +208,7 @@ export const useLifeStore = create<LifeStore>()((set, get) => ({
         const updateData: Record<string, any> = {};
         if (updatedEvent.title !== undefined) updateData.title = updatedEvent.title;
         if (updatedEvent.date !== undefined) updateData.date = updatedEvent.date;
+        if (updatedEvent.endDate !== undefined) updateData.end_date = updatedEvent.endDate || null;
         if (updatedEvent.categoryId !== undefined) updateData.category = updatedEvent.categoryId;
         if (updatedEvent.description !== undefined) updateData.description = updatedEvent.description;
         if (updatedEvent.location !== undefined) updateData.location = updatedEvent.location;
