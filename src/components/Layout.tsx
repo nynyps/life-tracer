@@ -138,11 +138,21 @@ const Layout: React.FC<LayoutProps> = ({
                                 </button>
 
                                 <button
-                                    onClick={() => {
-                                        if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
-                                            // Ideally this calls a cloud function. For now we just sign out as frontend deletion is blocked.
-                                            alert('Pour supprimer votre compte, veuillez contacter le support ou utiliser l\'interface d\'administration (cette fonctionnalité nécessite une fonction serveur sécurisée).');
-                                            signOut();
+                                    onClick={async () => {
+                                        if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Toutes vos données seront effacées définitivement.')) {
+                                            try {
+                                                const { error } = await supabase.rpc('delete_user');
+                                                if (error) {
+                                                    console.error('Error deleting account:', error);
+                                                    alert('Erreur lors de la suppression du compte : ' + error.message);
+                                                } else {
+                                                    await signOut();
+                                                    alert('Votre compte a été supprimé avec succès.');
+                                                }
+                                            } catch (err) {
+                                                console.error('Unexpected error:', err);
+                                                alert('Une erreur inattendue est survenue.');
+                                            }
                                         }
                                     }}
                                     className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg flex items-center gap-2 transition-colors"
