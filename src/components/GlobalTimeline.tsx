@@ -256,6 +256,22 @@ const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
                                                     <div className="flex items-center gap-2 text-xs text-slate-400 mb-1">
                                                         <Calendar className="w-3 h-3" />
                                                         <span>{formatHEDate(event.date)}</span>
+                                                        {event.endDate && (
+                                                            <span className="text-slate-500">
+                                                                - {(() => {
+                                                                    const start = new Date(event.date);
+                                                                    const end = new Date(event.endDate);
+                                                                    const diffTime = Math.abs(end.getTime() - start.getTime());
+                                                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                                                    if (diffDays < 30) return `${diffDays} jours`;
+                                                                    if (diffDays < 365) return `${Math.floor(diffDays / 30)} mois`;
+                                                                    const years = Math.floor(diffDays / 365);
+                                                                    const months = Math.floor((diffDays % 365) / 30);
+                                                                    return months > 0 ? `${years} ans ${months} mois` : `${years} ans`;
+                                                                })()}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <div className="flex items-center gap-2 text-xs text-slate-400">
                                                         <Tag className="w-3 h-3" />
