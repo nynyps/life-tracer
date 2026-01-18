@@ -76,7 +76,7 @@ const Layout: React.FC<LayoutProps> = ({
                         <div className="w-px h-6 bg-slate-800 mx-2" />
                         <button
                             onClick={onOpenCategoryManager}
-                            className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-indigo-300 border border-slate-700/50 hover:border-indigo-500/30 whitespace-nowrap"
+                            className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-lg whitespace-nowrap bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/20 active:scale-95"
                             title="Gérer les catégories"
                         >
                             <Settings className="w-4 h-4" />
@@ -117,7 +117,7 @@ const Layout: React.FC<LayoutProps> = ({
                             title={categories.length === 0 ? "Créez d'abord une catégorie" : "Ajouter un souvenir"}
                         >
                             <Plus className="w-4 h-4" />
-                            <span className="hidden sm:inline">Gérer souvenirs</span>
+                            <span className="hidden sm:inline">Ajouter souvenir</span>
                         </button>
 
                         {/* User & Dropdown */}
