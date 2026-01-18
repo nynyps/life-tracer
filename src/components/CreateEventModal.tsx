@@ -3,7 +3,6 @@ import { X, Calendar, Type, FileText, MapPin, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { LifeEvent } from '../types';
 import { useLifeStore } from '../store/useLifeStore';
-import { toHE } from '../utils/dateUtils';
 
 interface CreateEventModalProps {
     isOpen: boolean;
@@ -26,8 +25,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
         people: '',
         isImportant: false,
     });
-
-    const holoceneYear = toHE(new Date(formData.date).getFullYear());
 
     useEffect(() => {
         if (isOpen) {
@@ -126,12 +123,7 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                             <div className="grid grid-cols-2 gap-4">
                                 {/* Date Input */}
                                 <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <label className="text-xs font-medium uppercase tracking-wider text-slate-400">Date</label>
-                                        <span className="text-[10px] font-bold bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-500/30">
-                                            {holoceneYear}
-                                        </span>
-                                    </div>
+                                    <label className="text-xs font-medium uppercase tracking-wider text-slate-400">Date</label>
                                     <div className="relative">
                                         <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                                         <input
@@ -215,26 +207,32 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                                         />
                                     </div>
                                 </div>
-                                {/* Super Souvenir Checkbox */}
-                                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 flex items-start gap-4">
-                                    <div className="pt-0.5">
+                            </div>
+
+                            {/* Super Souvenir Checkbox - Centered and Sober */}
+                            <div className="flex flex-col items-center justify-center pt-2 pb-1">
+                                <label className="flex items-center gap-3 cursor-pointer group">
+                                    <div className="relative flex items-center">
                                         <input
                                             type="checkbox"
-                                            id="isImportant"
                                             checked={!!formData.isImportant}
                                             onChange={e => setFormData({ ...formData, isImportant: e.target.checked })}
-                                            className="w-5 h-5 bg-slate-950 border-slate-700 rounded text-amber-500 focus:ring-amber-500/50 focus:ring-offset-0 cursor-pointer accent-amber-500"
+                                            className="peer sr-only"
                                         />
+                                        <div className="w-5 h-5 border-2 border-slate-600 rounded bg-slate-950 peer-checked:bg-amber-500 peer-checked:border-amber-500 transition-all"></div>
+                                        <svg className="absolute w-3.5 h-3.5 text-slate-950 left-1 top-1 pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                        </svg>
                                     </div>
-                                    <div>
-                                        <label htmlFor="isImportant" className="block text-sm font-bold text-amber-200 mb-1 cursor-pointer">
-                                            Définir comme Super-Souvenir
-                                        </label>
-                                        <p className="text-xs text-amber-200/60 leading-relaxed">
-                                            Les super-souvenirs marquent les étapes majeures de votre vie. Ils seront mis en avant visuellement dans la vue globale avec leur titre affiché.
-                                        </p>
-                                    </div>
-                                </div>
+                                    <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">
+                                        Définir comme Super-Souvenir
+                                    </span>
+                                </label>
+                                {formData.isImportant && (
+                                    <p className="text-xs text-slate-500 mt-2 text-center max-w-sm animate-in fade-in slide-in-from-top-1">
+                                        Ce souvenir sera mis en avant visuellement dans la vue globale.
+                                    </p>
+                                )}
                             </div>
 
                             <div className="pt-4">
