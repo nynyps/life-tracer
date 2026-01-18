@@ -30,6 +30,7 @@ const Layout: React.FC<LayoutProps> = ({
     const { user, signOut } = useAuth();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
     const [isDeleting, setIsDeleting] = React.useState(false);
+    const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
     const categories = useLifeStore((state) => state.categories);
 
     const navItems = [
@@ -123,15 +124,24 @@ const Layout: React.FC<LayoutProps> = ({
                         </button>
 
                         {/* User & Dropdown */}
-                        <div className="relative group">
-                            <button className="flex items-center gap-2 p-2 rounded-full hover:bg-white/5 transition-all outline-none">
+                        <div className="relative">
+                            {isUserMenuOpen && (
+                                <div className="fixed inset-0 z-40" onClick={() => setIsUserMenuOpen(false)} />
+                            )}
+                            <button
+                                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                                className={`flex items-center gap-2 p-2 rounded-full transition-all outline-none relative z-50 ${isUserMenuOpen ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                            >
                                 <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 text-indigo-300">
                                     <User className="w-4 h-4" />
                                 </div>
                             </button>
 
                             {/* Dropdown Menu */}
-                            <div className="absolute right-0 top-full mt-2 w-64 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-1 invisible opacity-0 translate-y-2 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 transition-all duration-200 z-50">
+                            <div className={`absolute right-0 top-full mt-2 w-64 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-1 transition-all duration-200 z-50 ${isUserMenuOpen
+                                ? 'visible opacity-100 translate-y-0'
+                                : 'invisible opacity-0 translate-y-2'
+                                }`}>
                                 <div className="px-3 py-3 border-b border-slate-800 mb-1">
                                     <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">Connecté en tant que</p>
                                     <p className="text-sm text-slate-200 truncate font-semibold">{user?.email}</p>
@@ -139,7 +149,7 @@ const Layout: React.FC<LayoutProps> = ({
 
                                 <button
                                     onClick={async () => {
-                                        // Simple password reset trigger (sends email)
+                                        setIsUserMenuOpen(false);
                                         const { error } = await supabase.auth.resetPasswordForEmail(user?.email || '');
                                         if (!error) alert('Email de réinitialisation envoyé !');
                                     }}
@@ -150,7 +160,10 @@ const Layout: React.FC<LayoutProps> = ({
                                 </button>
 
                                 <button
-                                    onClick={() => setIsDeleteModalOpen(true)}
+                                    onClick={() => {
+                                        setIsUserMenuOpen(false);
+                                        setIsDeleteModalOpen(true);
+                                    }}
                                     className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg flex items-center gap-2 transition-colors"
                                 >
                                     <Trash2 className="w-4 h-4" />
@@ -160,7 +173,10 @@ const Layout: React.FC<LayoutProps> = ({
                                 <div className="h-px bg-slate-800 my-1 mx-2" />
 
                                 <button
-                                    onClick={signOut}
+                                    onClick={() => {
+                                        setIsUserMenuOpen(false);
+                                        signOut();
+                                    }}
                                     className="w-full text-left px-3 py-2 text-sm text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg flex items-center gap-2 transition-colors"
                                 >
                                     <LogOut className="w-4 h-4" />
