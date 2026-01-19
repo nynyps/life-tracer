@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Layers, Plus, Activity, LogOut, Settings, User, KeyRound, Trash2 } from 'lucide-react';
+import { Layers, Plus, Activity, LogOut, Settings, User, KeyRound, Trash2, HelpCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useLifeStore } from '../store/useLifeStore';
 import CategoryManagerModal from './CategoryManagerModal';
+import TutorialModal from './TutorialModal';
 import { getCategoryIcon } from '../types';
 
 interface LayoutProps {
@@ -31,6 +32,7 @@ const Layout: React.FC<LayoutProps> = ({
     const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
     const [isDeleting, setIsDeleting] = React.useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
+    const [isTutorialOpen, setIsTutorialOpen] = React.useState(false);
     const categories = useLifeStore((state) => state.categories);
 
     const navItems = [
@@ -65,6 +67,7 @@ const Layout: React.FC<LayoutProps> = ({
                                     <Link
                                         key={item.path}
                                         to={item.path}
+                                        id={item.path === '/global' ? 'tutorial-global-view' : undefined}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${isActive
                                             ? 'bg-white/10 text-white shadow-lg shadow-white/5'
                                             : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -78,6 +81,7 @@ const Layout: React.FC<LayoutProps> = ({
                         </div>
                         <div className="w-px h-6 bg-slate-800 mx-1 flex-shrink-0" />
                         <button
+                            id="tutorial-categories"
                             onClick={onOpenCategoryManager}
                             className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-lg whitespace-nowrap bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-500/20 active:scale-95 flex-shrink-0"
                             title="Gérer les catégories"
@@ -111,6 +115,7 @@ const Layout: React.FC<LayoutProps> = ({
                         )}
 
                         <button
+                            id="tutorial-add-event"
                             onClick={categories.length > 0 ? onOpenAddModal : undefined}
                             disabled={categories.length === 0}
                             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-lg whitespace-nowrap ${categories.length === 0
@@ -121,6 +126,15 @@ const Layout: React.FC<LayoutProps> = ({
                         >
                             <Plus className="w-4 h-4" />
                             <span className="hidden sm:inline">Ajouter souvenir</span>
+                        </button>
+
+                        {/* Help Button */}
+                        <button
+                            onClick={() => setIsTutorialOpen(true)}
+                            className="p-2 rounded-full text-slate-400 hover:text-indigo-400 hover:bg-white/5 transition-all"
+                            title="Tutoriel"
+                        >
+                            <HelpCircle className="w-5 h-5" />
                         </button>
 
                         {/* User & Dropdown */}
@@ -216,6 +230,11 @@ const Layout: React.FC<LayoutProps> = ({
             <CategoryManagerModal
                 isOpen={isCategoryModalOpen}
                 onClose={onCloseCategoryManager}
+            />
+
+            <TutorialModal
+                isOpen={isTutorialOpen}
+                onClose={() => setIsTutorialOpen(false)}
             />
 
             {/* Delete Account Modal */}
