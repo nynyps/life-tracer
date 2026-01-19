@@ -198,112 +198,166 @@ const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
                                     );
                                 })}
 
-                                {/* Events */}
-                                {rowEvents.map((event) => {
-                                    const category = categories.find(c => c.id === event.categoryId);
-                                    const colorData = AVAILABLE_COLORS.find(c => c.name === category?.color);
-                                    const dotColor = colorData?.class || 'bg-indigo-500';
-                                    const shadowColor = category?.color === 'rose' ? 'shadow-rose-500/50' :
-                                        category?.color === 'emerald' ? 'shadow-emerald-500/50' :
-                                            category?.color === 'blue' ? 'shadow-blue-500/50' :
-                                                category?.color === 'amber' ? 'shadow-amber-500/50' :
-                                                    category?.color === 'violet' ? 'shadow-violet-500/50' :
-                                                        category?.color === 'cyan' ? 'shadow-cyan-500/50' : 'shadow-indigo-500/50';
+                                {/* Events - Group by position to show all overlapping souvenirs */}
+                                {(() => {
+                                    // Group events by their position (within a threshold)
+                                    const POSITION_THRESHOLD = 0.5; // Events within 0.5% are considered at same position
+                                    const eventGroups: { position: number; events: typeof rowEvents }[] = [];
 
-                                    const left = getPositionPercent(event.date, row.startYear, isReverse);
+                                    rowEvents.forEach(event => {
+                                        const pos = getPositionPercent(event.date, row.startYear, isReverse);
+                                        const existingGroup = eventGroups.find(g => Math.abs(g.position - pos) < POSITION_THRESHOLD);
+                                        if (existingGroup) {
+                                            existingGroup.events.push(event);
+                                        } else {
+                                            eventGroups.push({ position: pos, events: [event] });
+                                        }
+                                    });
 
-                                    // Tooltip positioning logic
-                                    let tooltipAlignClass = "left-1/2 -translate-x-1/2 origin-bottom";
-                                    let arrowAlignClass = "left-1/2 -translate-x-1/2";
-                                    if (left < 10) {
-                                        tooltipAlignClass = "left-0 origin-bottom-left";
-                                        arrowAlignClass = "left-4";
-                                    } else if (left > 90) {
-                                        tooltipAlignClass = "right-0 left-auto origin-bottom-right";
-                                        arrowAlignClass = "right-4 left-auto";
-                                    }
+                                    return eventGroups.map((group) => {
+                                        const left = group.position;
+                                        const eventsInGroup = group.events;
+                                        const groupId = eventsInGroup.map(e => e.id).join('-');
 
-                                    return (
-                                        <React.Fragment key={event.id}>
-                                            {/* Duration Line Visualization */}
-                                            {hoveredEventId === event.id && event.endDate && (
+                                        // Use the first event's category for the dot color (or most important)
+                                        const primaryEvent = eventsInGroup.find(e => e.isImportant) || eventsInGroup[0];
+                                        const primaryCategory = categories.find(c => c.id === primaryEvent.categoryId);
+                                        const colorData = AVAILABLE_COLORS.find(c => c.name === primaryCategory?.color);
+                                        const dotColor = colorData?.class || 'bg-indigo-500';
+                                        const shadowColor = primaryCategory?.color === 'rose' ? 'shadow-rose-500/50' :
+                                            primaryCategory?.color === 'emerald' ? 'shadow-emerald-500/50' :
+                                                primaryCategory?.color === 'blue' ? 'shadow-blue-500/50' :
+                                                    primaryCategory?.color === 'amber' ? 'shadow-amber-500/50' :
+                                                        primaryCategory?.color === 'violet' ? 'shadow-violet-500/50' :
+                                                            primaryCategory?.color === 'cyan' ? 'shadow-cyan-500/50' : 'shadow-indigo-500/50';
+
+                                        // Tooltip positioning logic
+                                        let tooltipAlignClass = "left-1/2 -translate-x-1/2 origin-bottom";
+                                        let arrowAlignClass = "left-1/2 -translate-x-1/2";
+                                        if (left < 10) {
+                                            tooltipAlignClass = "left-0 origin-bottom-left";
+                                            arrowAlignClass = "left-4";
+                                        } else if (left > 90) {
+                                            tooltipAlignClass = "right-0 left-auto origin-bottom-right";
+                                            arrowAlignClass = "right-4 left-auto";
+                                        }
+
+
+
+                                        return (
+                                            <React.Fragment key={groupId}>
+                                                {/* Duration Line Visualization for hovered event */}
+                                                {eventsInGroup.map(event => {
+                                                    if (hoveredEventId !== event.id || !event.endDate) return null;
+                                                    const eventColorData = AVAILABLE_COLORS.find(c => c.name === categories.find(cat => cat.id === event.categoryId)?.color);
+                                                    const eventDotColor = eventColorData?.class || 'bg-indigo-500';
+                                                    return (
+                                                        <div
+                                                            key={`duration-${event.id}`}
+                                                            className={`absolute top-1/2 -translate-y-1/2 h-1.5 rounded-full ${eventDotColor} opacity-50 pointer-events-none z-0 transition-opacity duration-300`}
+                                                            style={{
+                                                                left: `${Math.min(
+                                                                    getPositionPercent(event.date, row.startYear, isReverse),
+                                                                    getPositionPercent(event.endDate, row.startYear, isReverse)
+                                                                )}%`,
+                                                                width: `${Math.abs(
+                                                                    getPositionPercent(event.date, row.startYear, isReverse) -
+                                                                    getPositionPercent(event.endDate, row.startYear, isReverse)
+                                                                )}%`
+                                                            }}
+                                                        />
+                                                    );
+                                                })}
+
                                                 <div
-                                                    className={`absolute top-1/2 -translate-y-1/2 h-1.5 rounded-full ${dotColor} opacity-50 pointer-events-none z-0 transition-opacity duration-300`}
-                                                    style={{
-                                                        left: `${Math.min(
-                                                            getPositionPercent(event.date, row.startYear, isReverse),
-                                                            getPositionPercent(event.endDate, row.startYear, isReverse)
-                                                        )}%`,
-                                                        width: `${Math.abs(
-                                                            getPositionPercent(event.date, row.startYear, isReverse) -
-                                                            getPositionPercent(event.endDate, row.startYear, isReverse)
-                                                        )}%`
-                                                    }}
-                                                />
-                                            )}
+                                                    onMouseEnter={() => setHoveredEventId(groupId)}
+                                                    onMouseLeave={() => setHoveredEventId(null)}
+                                                    className="absolute top-1/2 -translate-y-1/2 group z-10"
+                                                    style={{ left: `${left}%` }}
+                                                >
+                                                    {/* Super Souvenir Title for important events */}
+                                                    {primaryEvent.isImportant && (
+                                                        <div
+                                                            onClick={(e) => { e.stopPropagation(); navigate(`/category/${primaryCategory?.id}#event-${primaryEvent.id}`); }}
+                                                            className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-slate-200 bg-slate-900/90 px-2 py-1 rounded-md border border-slate-700/50 cursor-pointer hover:bg-slate-800 transition-colors">
+                                                            {primaryEvent.title}
+                                                            {eventsInGroup.length > 1 && <span className="ml-1 text-slate-400">+{eventsInGroup.length - 1}</span>}
+                                                        </div>
+                                                    )}
 
-                                            <div
-                                                onMouseEnter={() => setHoveredEventId(event.id)}
-                                                onMouseLeave={() => setHoveredEventId(null)}
-                                                className="absolute top-1/2 -translate-y-1/2 group z-10"
-                                                style={{ left: `${left}%` }}
-                                            >
-                                                {/* Super Souvenir Title */}
-                                                {event.isImportant && (
+                                                    {/* Trigger Area - show stacked indicator if multiple */}
+                                                    <div className="relative">
+                                                        {eventsInGroup.length > 1 && (
+                                                            <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-[10px] text-slate-300 font-bold z-20`}>
+                                                                {eventsInGroup.length}
+                                                            </div>
+                                                        )}
+                                                        <div
+                                                            onClick={() => navigate(`/category/${primaryCategory?.id}#event-${primaryEvent.id}`)}
+                                                            className={`${primaryEvent.isImportant
+                                                                ? `w-1.5 h-14 -mt-5 ${dotColor} ${shadowColor} shadow-xl border border-white/30`
+                                                                : `w-5 h-5 rounded-full ${dotColor} ${shadowColor} border-2 border-slate-900 shadow-lg`
+                                                                } cursor-pointer transform transition-all group-hover:scale-150 group-hover:z-50`}
+                                                        />
+                                                    </div>
+
+                                                    {/* Tooltip showing ALL events at this position */}
                                                     <div
-                                                        onClick={(e) => { e.stopPropagation(); navigate(`/category/${category?.id}#event-${event.id}`); }}
-                                                        className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-slate-200 bg-slate-900/90 px-2 py-1 rounded-md border border-slate-700/50 cursor-pointer hover:bg-slate-800 transition-colors">
-                                                        {event.title}
-                                                    </div>
-                                                )}
-
-                                                {/* Trigger Area */}
-                                                <div
-                                                    onClick={() => navigate(`/category/${category?.id}#event-${event.id}`)}
-                                                    className={`${event.isImportant
-                                                        ? `w-1.5 h-14 -mt-5 ${dotColor} ${shadowColor} shadow-xl border border-white/30`
-                                                        : `w-5 h-5 rounded-full ${dotColor} ${shadowColor} border-2 border-slate-900 shadow-lg`
-                                                        } cursor-pointer transform transition-all group-hover:scale-150 group-hover:z-50`}
-                                                />
-
-                                                {/* Tooltip */}
-                                                <div
-                                                    onClick={() => navigate(`/category/${category?.id}#event-${event.id}`)}
-                                                    className={`absolute bottom-full mb-4 hidden group-hover:block z-50 w-64 ${tooltipAlignClass} cursor-pointer`}>
-                                                    <div className="bg-slate-800/90 backdrop-blur-md p-3 rounded-lg border border-slate-700 shadow-2xl text-left animate-in fade-in zoom-in-95 duration-200">
-                                                        <div className={`h-1 w-full mb-2 rounded-full ${dotColor.split(' ')[0]}`} />
-                                                        <h3 className="font-bold text-slate-100 text-sm mb-1">{event.title}</h3>
-                                                        <div className="flex items-center gap-2 text-xs text-slate-400 mb-1">
-                                                            <Calendar className="w-3 h-3" />
-                                                            <span>{formatHEDate(event.date)}</span>
-                                                            {event.endDate && (
-                                                                <span className="text-slate-500">
-                                                                    - {(() => {
-                                                                        const start = new Date(event.date);
-                                                                        const end = new Date(event.endDate);
-                                                                        const diffTime = Math.abs(end.getTime() - start.getTime());
-                                                                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                                                                        if (diffDays < 30) return `${diffDays} jours`;
-                                                                        if (diffDays < 365) return `${Math.floor(diffDays / 30)} mois`;
-                                                                        const years = Math.floor(diffDays / 365);
-                                                                        const months = Math.floor((diffDays % 365) / 30);
-                                                                        return months > 0 ? `${years} ans ${months} mois` : `${years} ans`;
-                                                                    })()}
-                                                                </span>
+                                                        className={`absolute bottom-full mb-4 hidden group-hover:block z-50 w-72 ${tooltipAlignClass}`}>
+                                                        <div className="bg-slate-800/95 backdrop-blur-md p-3 rounded-lg border border-slate-700 shadow-2xl text-left animate-in fade-in zoom-in-95 duration-200 max-h-80 overflow-y-auto custom-scrollbar">
+                                                            {eventsInGroup.length > 1 && (
+                                                                <div className="text-xs text-slate-500 mb-2 pb-2 border-b border-slate-700">
+                                                                    {eventsInGroup.length} souvenirs à cette date
+                                                                </div>
                                                             )}
+                                                            {eventsInGroup.map((event, eventIndex) => {
+                                                                const category = categories.find(c => c.id === event.categoryId);
+                                                                const eventColorData = AVAILABLE_COLORS.find(c => c.name === category?.color);
+                                                                const eventDotColor = eventColorData?.class || 'bg-indigo-500';
+
+                                                                return (
+                                                                    <div
+                                                                        key={event.id}
+                                                                        onClick={(e) => { e.stopPropagation(); navigate(`/category/${category?.id}#event-${event.id}`); }}
+                                                                        className={`cursor-pointer hover:bg-slate-700/50 rounded-lg p-2 -mx-1 transition-colors ${eventIndex > 0 ? 'mt-2 pt-2 border-t border-slate-700/50' : ''}`}
+                                                                    >
+                                                                        <div className={`h-1 w-full mb-2 rounded-full ${eventDotColor.split(' ')[0]}`} />
+                                                                        <h3 className="font-bold text-slate-100 text-sm mb-1">{event.title}</h3>
+                                                                        <div className="flex items-center gap-2 text-xs text-slate-400 mb-1">
+                                                                            <Calendar className="w-3 h-3" />
+                                                                            <span>{formatHEDate(event.date)}</span>
+                                                                            {event.endDate && (
+                                                                                <span className="text-slate-500">
+                                                                                    - {(() => {
+                                                                                        const start = new Date(event.date);
+                                                                                        const end = new Date(event.endDate);
+                                                                                        const diffTime = Math.abs(end.getTime() - start.getTime());
+                                                                                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                                                                        if (diffDays < 30) return `${diffDays} jours`;
+                                                                                        if (diffDays < 365) return `${Math.floor(diffDays / 30)} mois`;
+                                                                                        const years = Math.floor(diffDays / 365);
+                                                                                        const months = Math.floor((diffDays % 365) / 30);
+                                                                                        return months > 0 ? `${years} ans ${months} mois` : `${years} ans`;
+                                                                                    })()}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2 text-xs text-slate-400">
+                                                                            <Tag className="w-3 h-3" />
+                                                                            <span className="uppercase">{category?.name || 'Sans catégorie'}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
                                                         </div>
-                                                        <div className="flex items-center gap-2 text-xs text-slate-400">
-                                                            <Tag className="w-3 h-3" />
-                                                            <span className="uppercase">{category?.name || 'Sans catégorie'}</span>
-                                                        </div>
+                                                        <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-slate-800 absolute -bottom-1.5 opacity-90 ${arrowAlignClass}`}></div>
                                                     </div>
-                                                    <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-slate-800 absolute -bottom-1.5 opacity-90 ${arrowAlignClass}`}></div>
                                                 </div>
-                                            </div>
-                                        </React.Fragment>
-                                    );
-                                })}
+                                            </React.Fragment>
+                                        );
+                                    });
+                                })()}
                                 {/* Duration Lines Layer (rendered separate or with events, here with events for easy map access, but careful with z-index) */}
                             </div>
                         );

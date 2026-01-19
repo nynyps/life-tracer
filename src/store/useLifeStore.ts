@@ -56,6 +56,7 @@ export const useLifeStore = create<LifeStore>()((set, get) => ({
             id: c.id,
             name: c.name,
             color: c.color,
+            icon: c.icon || undefined,
             userId: c.user_id,
         }));
 
@@ -74,6 +75,7 @@ export const useLifeStore = create<LifeStore>()((set, get) => ({
                 user_id: user.id,
                 name: newCategory.name,
                 color: newCategory.color,
+                icon: newCategory.icon || null,
             })
             .select()
             .single();
@@ -88,6 +90,7 @@ export const useLifeStore = create<LifeStore>()((set, get) => ({
                 id: data.id,
                 name: data.name,
                 color: data.color,
+                icon: data.icon || undefined,
                 userId: data.user_id,
             };
             set((state) => ({ categories: [...state.categories, category] }));
@@ -100,6 +103,7 @@ export const useLifeStore = create<LifeStore>()((set, get) => ({
             .update({
                 name: updatedCategory.name,
                 color: updatedCategory.color,
+                icon: updatedCategory.icon || null,
             })
             .eq('id', id);
 
