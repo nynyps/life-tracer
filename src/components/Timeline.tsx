@@ -14,11 +14,12 @@ interface TimelineProps {
     pixelsPerYear: number;
     onOpenCategoryManager?: () => void;
     onOpenAddModal?: () => void;
+    selectedCategoryId?: string;
 }
 
 const START_PADDING = 50;
 
-const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleImportant, pixelsPerYear, onOpenCategoryManager, onOpenAddModal }) => {
+const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleImportant, pixelsPerYear, onOpenCategoryManager, onOpenAddModal, selectedCategoryId }) => {
     const categories = useLifeStore((state) => state.categories);
 
     // 1. Calculate Time Range
@@ -55,7 +56,9 @@ const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleI
     };
 
     // Categories to display as columns
-    const displayCategories = categories;
+    const displayCategories = selectedCategoryId
+        ? categories.filter(c => c.id === selectedCategoryId)
+        : categories;
 
     // Empty State: No Categories
     if (displayCategories.length === 0) {
@@ -162,7 +165,7 @@ const Timeline: React.FC<TimelineProps> = ({ events, onEdit, onDelete, onToggleI
                                 .map(event => (
                                     <div
                                         key={event.id}
-                                        className="absolute left-2 right-2 z-10"
+                                        className="absolute left-2 right-2 z-10 hover:z-50 transition-all duration-200"
                                         style={{ top: getPosition(event.date) }}
                                     >
                                         <div className="relative group">

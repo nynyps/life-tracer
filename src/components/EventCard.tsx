@@ -60,7 +60,24 @@ const EventCard: React.FC<EventCardProps> = ({ event, onEdit, onDelete, onToggle
                         {event.people.join(', ')}
                     </div>
                 )}
+                {event.isCurrent && (
+                    <div className="w-full mt-1">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 text-[10px] font-medium border border-indigo-500/20">
+                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+                            Toujours en cours
+                        </span>
+                    </div>
+                )}
             </div>
+
+            {(event.emotionalValence !== undefined && event.emotionalValence !== 0) && (
+                <div className={`absolute top-1/2 -translate-y-1/2 right-6 px-2 py-1 rounded-md text-[10px] font-bold border ${event.emotionalValence > 0
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                    : 'bg-red-500/10 text-red-400 border-red-500/20'
+                    }`}>
+                    {event.emotionalValence > 0 ? '+' : ''}{event.emotionalValence}
+                </div>
+            )}
 
             {/* Actions */}
             <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover/card:opacity-100 transition-opacity z-20">

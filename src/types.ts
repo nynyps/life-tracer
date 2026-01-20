@@ -16,6 +16,8 @@ export interface LifeEvent {
     location?: string;
     people?: string[];
     isImportant?: boolean;
+    emotionalValence?: number; // -5 to +5
+    isCurrent?: boolean;
 }
 
 // Helper to get Tailwind color classes from category color

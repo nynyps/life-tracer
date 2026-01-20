@@ -44,7 +44,7 @@ const CategoryRoute: React.FC<{
   const events = useLifeStore((state) => state.events);
   const filteredEvents = events.filter(e => e.categoryId === categoryId);
 
-  return <Timeline events={filteredEvents} {...props} />;
+  return <Timeline events={filteredEvents} selectedCategoryId={categoryId} {...props} />;
 };
 
 // Main app content (extracted for auth context access)

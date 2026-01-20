@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Type, FileText, MapPin, Users } from 'lucide-react';
+import { X, Calendar, Type, FileText, MapPin, Users, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { LifeEvent } from '../types';
 import { useLifeStore } from '../store/useLifeStore';
@@ -25,6 +25,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
         location: '',
         people: '',
         isImportant: false,
+        emotionalValence: 0,
+        isCurrent: false,
     });
 
     useEffect(() => {
@@ -39,6 +41,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                     location: initialData.location || '',
                     people: initialData.people ? initialData.people.join(', ') : '',
                     isImportant: initialData.isImportant || false,
+                    emotionalValence: initialData.emotionalValence ?? 0,
+                    isCurrent: initialData.isCurrent || false,
                 });
             } else {
                 setFormData({
@@ -50,6 +54,8 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                     location: '',
                     people: '',
                     isImportant: false,
+                    emotionalValence: 0,
+                    isCurrent: false,
                 });
             }
         }
@@ -139,20 +145,6 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                                     </div>
                                 </div>
 
-                                {/* End Date Input (Optional) */}
-                                <div className="space-y-2">
-                                    <label className="text-xs font-medium uppercase tracking-wider text-slate-400">Date de fin (Optionnel)</label>
-                                    <div className="relative">
-                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                        <input
-                                            type="date"
-                                            value={formData.endDate || ''}
-                                            onChange={e => setFormData({ ...formData, endDate: e.target.value })}
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all [color-scheme:dark]"
-                                        />
-                                    </div>
-                                </div>
-
                                 {/* Category Select */}
                                 <div className="space-y-2">
                                     <label className="text-xs font-medium uppercase tracking-wider text-slate-400">Catégorie</label>
@@ -176,6 +168,41 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                                             </svg>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Until Today Checkbox - Below Start Date */}
+                            <div className="flex items-center -mt-2">
+                                <label className="flex items-center gap-2 cursor-pointer group">
+                                    <div className="relative flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.isCurrent}
+                                            onChange={e => setFormData({ ...formData, isCurrent: e.target.checked, endDate: e.target.checked ? '' : formData.endDate })}
+                                            className="peer sr-only"
+                                        />
+                                        <div className="w-4 h-4 border border-slate-600 rounded bg-slate-950 peer-checked:bg-indigo-500 peer-checked:border-indigo-500 transition-all flex items-center justify-center">
+                                            <svg className="w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <span className="text-xs font-medium text-slate-400 group-hover:text-indigo-400 transition-colors">Jusqu'à aujourd'hui</span>
+                                </label>
+                            </div>
+
+                            {/* End Date - Optional */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-medium uppercase tracking-wider text-slate-400">Date de fin (Optionnel)</label>
+                                <div className="relative">
+                                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                    <input
+                                        type="date"
+                                        value={formData.endDate || ''}
+                                        disabled={formData.isCurrent}
+                                        onChange={e => setFormData({ ...formData, endDate: e.target.value })}
+                                        className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all [color-scheme:dark] disabled:opacity-50 disabled:cursor-not-allowed"
+                                    />
                                 </div>
                             </div>
 
@@ -223,6 +250,39 @@ const CreateEventModal: React.FC<CreateEventModalProps> = ({ isOpen, onClose, in
                                             className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder:text-slate-600"
                                         />
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Emotional Valence */}
+                            <div className="space-y-3 pb-2">
+                                <label className="text-xs font-medium uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                                    Ressenti
+                                    <div className="group relative">
+                                        <Info className="w-3.5 h-3.5 text-slate-500 cursor-help" />
+                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-300 shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-center">
+                                            <p className="font-semibold text-white mb-1">Impact sur vous</p>
+                                            Évaluez ce souvenir de <span className="text-red-400">-5</span> (négatif) à <span className="text-emerald-400">+5</span> (positif).
+                                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-800 border-b border-r border-slate-700 transform rotate-45"></div>
+                                        </div>
+                                    </div>
+                                </label>
+                                <div className="flex items-center justify-between gap-1 bg-slate-950/50 p-2 rounded-lg border border-slate-800/50">
+                                    <span className="text-xs font-bold text-red-400 w-6 text-center">-5</span>
+                                    <input
+                                        type="range"
+                                        min="-5"
+                                        max="5"
+                                        step="1"
+                                        value={formData.emotionalValence}
+                                        onChange={e => setFormData({ ...formData, emotionalValence: parseInt(e.target.value) })}
+                                        className="w-full h-1.5 bg-gradient-to-r from-red-500 via-slate-700 to-emerald-500 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-lg hover:[&::-webkit-slider-thumb]:scale-110 transition-all"
+                                    />
+                                    <span className="text-xs font-bold text-emerald-400 w-6 text-center">+5</span>
+                                </div>
+                                <div className="text-center text-xs font-medium text-slate-400">
+                                    {formData.emotionalValence === 0 ? "Neutre" :
+                                        formData.emotionalValence > 0 ? `Positif (+${formData.emotionalValence})` :
+                                            `Négatif (${formData.emotionalValence})`}
                                 </div>
                             </div>
 

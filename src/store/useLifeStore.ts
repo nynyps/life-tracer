@@ -158,6 +158,8 @@ export const useLifeStore = create<LifeStore>()((set, get) => ({
             location: e.location || undefined,
             people: e.people || undefined,
             isImportant: e.is_important || false,
+            emotionalValence: e.emotional_valence ?? undefined,
+            isCurrent: e.is_current || false,
         }));
 
         set({ events });
@@ -179,6 +181,8 @@ export const useLifeStore = create<LifeStore>()((set, get) => ({
                 location: newEvent.location || null,
                 people: newEvent.people || null,
                 is_important: newEvent.isImportant || false,
+                emotional_valence: newEvent.emotionalValence ?? null,
+                is_current: newEvent.isCurrent || false,
             })
             .select()
             .single();
@@ -199,6 +203,8 @@ export const useLifeStore = create<LifeStore>()((set, get) => ({
                 location: data.location || undefined,
                 people: data.people || undefined,
                 isImportant: data.is_important || false,
+                emotionalValence: data.emotional_valence ?? undefined,
+                isCurrent: data.is_current || false,
             };
             set((state) => ({
                 events: [event, ...state.events].sort(
@@ -218,6 +224,8 @@ export const useLifeStore = create<LifeStore>()((set, get) => ({
         if (updatedEvent.location !== undefined) updateData.location = updatedEvent.location;
         if (updatedEvent.people !== undefined) updateData.people = updatedEvent.people;
         if (updatedEvent.isImportant !== undefined) updateData.is_important = updatedEvent.isImportant;
+        if (updatedEvent.emotionalValence !== undefined) updateData.emotional_valence = updatedEvent.emotionalValence;
+        if (updatedEvent.isCurrent !== undefined) updateData.is_current = updatedEvent.isCurrent;
 
         const { error } = await supabase
             .from('events')

@@ -198,6 +198,64 @@ const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
                                     );
                                 })}
 
+                                {(() => {
+                                    const today = new Date();
+                                    const currentYear = today.getFullYear();
+                                    if (currentYear >= row.startYear && currentYear < row.endYear) {
+                                        const percent = getPositionPercent(today.toISOString(), row.startYear, isReverse);
+                                        return (
+                                            <div
+                                                className="absolute top-1/2 -translate-y-1/2 z-20 flex flex-col items-center"
+                                                style={{ left: `${percent}%` }}
+                                            >
+                                                <div className="h-10 w-0.5 bg-indigo-500 animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
+                                                <div className="absolute bottom-full mb-1 bg-indigo-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold shadow-lg">
+                                                    AUJ.
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })()}
+
+                                {/* Multi-Row Duration Layer */}
+                                {events.map(event => {
+                                    if (!event.endDate && !event.isCurrent) return null;
+
+                                    const startYear = new Date(event.date).getFullYear();
+                                    const endYear = event.isCurrent ? new Date().getFullYear() : new Date(event.endDate!).getFullYear();
+
+                                    // Check if event overlaps this row
+                                    // Overlap = Start < RowEnd AND End >= RowStart
+                                    if (!(startYear < row.endYear && endYear >= row.startYear) || !selectedCategoryIds.includes(event.categoryId)) {
+                                        return null;
+                                    }
+
+                                    // Check hover state (matches individual ID or within a group ID string)
+                                    const isHovered = hoveredEventId && hoveredEventId.split('__').includes(event.id);
+
+                                    const today = new Date();
+                                    const effectiveEndDate = event.isCurrent ? today.toISOString() : event.endDate!;
+
+                                    const category = categories.find(c => c.id === event.categoryId);
+                                    const eventColorData = AVAILABLE_COLORS.find(c => c.name === category?.color);
+                                    const eventDotColor = eventColorData?.class || 'bg-indigo-500';
+
+                                    const leftPercent = getPositionPercent(event.date, row.startYear, isReverse);
+                                    const rightPercent = getPositionPercent(effectiveEndDate, row.startYear, isReverse);
+
+                                    return (
+                                        <div
+                                            key={`global-duration-${event.id}-${row.index}`}
+                                            style={{
+                                                left: `${Math.min(leftPercent, rightPercent)}%`,
+                                                width: `${Math.abs(leftPercent - rightPercent)}%`
+                                            }}
+                                            className={`absolute top-1/2 -translate-y-1/2 h-2 rounded-full ${eventDotColor} shadow-sm pointer-events-none z-5 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+                                        />
+                                    );
+                                })}
+
                                 {/* Events - Group by position to show all overlapping souvenirs */}
                                 {(() => {
                                     // Group events by their position (within a threshold)
@@ -217,7 +275,7 @@ const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
                                     return eventGroups.map((group) => {
                                         const left = group.position;
                                         const eventsInGroup = group.events;
-                                        const groupId = eventsInGroup.map(e => e.id).join('-');
+                                        const groupId = eventsInGroup.map(e => e.id).join('__');
 
                                         // Use the first event's category for the dot color (or most important)
                                         const primaryEvent = eventsInGroup.find(e => e.isImportant) || eventsInGroup[0];
@@ -232,43 +290,32 @@ const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
                                                             primaryCategory?.color === 'cyan' ? 'shadow-cyan-500/50' : 'shadow-indigo-500/50';
 
                                         // Tooltip positioning logic
-                                        let tooltipAlignClass = "left-1/2 -translate-x-1/2 origin-bottom";
+                                        // Include base positioning classes here so they can be swapped
+                                        let tooltipBaseClass = "bottom-full mb-4 origin-bottom";
+                                        let tooltipAlignClass = "left-1/2 -translate-x-1/2";
                                         let arrowAlignClass = "left-1/2 -translate-x-1/2";
+
                                         if (left < 10) {
-                                            tooltipAlignClass = "left-0 origin-bottom-left";
+                                            tooltipAlignClass = "left-0";
+                                            tooltipBaseClass = "bottom-full mb-4 origin-bottom-left";
                                             arrowAlignClass = "left-4";
                                         } else if (left > 90) {
-                                            tooltipAlignClass = "right-0 left-auto origin-bottom-right";
+                                            tooltipAlignClass = "right-0 left-auto";
+                                            tooltipBaseClass = "bottom-full mb-4 origin-bottom-right";
                                             arrowAlignClass = "right-4 left-auto";
                                         }
 
-
+                                        // Top row adjustment (flip tooltip to bottom if near top)
+                                        const isTopRow = rowIndex === 0;
+                                        if (isTopRow) {
+                                            // Swap bottom-full for top-full and margins
+                                            tooltipBaseClass = tooltipBaseClass.replace('origin-bottom', 'origin-top').replace('bottom-full mb-4', 'top-full mt-4');
+                                            // Arrow logic needs to flip in JSX or here? 
+                                            // The arrow is separate div, usually handles its own border flip logic
+                                        }
 
                                         return (
                                             <React.Fragment key={groupId}>
-                                                {/* Duration Line Visualization for hovered event */}
-                                                {eventsInGroup.map(event => {
-                                                    if (hoveredEventId !== event.id || !event.endDate) return null;
-                                                    const eventColorData = AVAILABLE_COLORS.find(c => c.name === categories.find(cat => cat.id === event.categoryId)?.color);
-                                                    const eventDotColor = eventColorData?.class || 'bg-indigo-500';
-                                                    return (
-                                                        <div
-                                                            key={`duration-${event.id}`}
-                                                            className={`absolute top-1/2 -translate-y-1/2 h-1.5 rounded-full ${eventDotColor} opacity-50 pointer-events-none z-0 transition-opacity duration-300`}
-                                                            style={{
-                                                                left: `${Math.min(
-                                                                    getPositionPercent(event.date, row.startYear, isReverse),
-                                                                    getPositionPercent(event.endDate, row.startYear, isReverse)
-                                                                )}%`,
-                                                                width: `${Math.abs(
-                                                                    getPositionPercent(event.date, row.startYear, isReverse) -
-                                                                    getPositionPercent(event.endDate, row.startYear, isReverse)
-                                                                )}%`
-                                                            }}
-                                                        />
-                                                    );
-                                                })}
-
                                                 <div
                                                     onMouseEnter={() => setHoveredEventId(groupId)}
                                                     onMouseLeave={() => setHoveredEventId(null)}
@@ -279,9 +326,9 @@ const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
                                                     {primaryEvent.isImportant && (
                                                         <div
                                                             onClick={(e) => { e.stopPropagation(); navigate(`/category/${primaryCategory?.id}#event-${primaryEvent.id}`); }}
-                                                            className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-slate-200 bg-slate-900/90 px-2 py-1 rounded-md border border-slate-700/50 cursor-pointer hover:bg-slate-800 transition-colors">
+                                                            className="absolute bottom-[30px] mb-4 left-1/2 -translate-x-1/2 whitespace-nowrap text-sm font-bold text-slate-200 bg-slate-900/90 px-3 py-1.5 rounded-lg border border-slate-600/50 shadow-xl cursor-pointer hover:bg-slate-800 transition-colors z-20 hover:scale-105 transform duration-200 cursor-pointer">
                                                             {primaryEvent.title}
-                                                            {eventsInGroup.length > 1 && <span className="ml-1 text-slate-400">+{eventsInGroup.length - 1}</span>}
+                                                            {eventsInGroup.length > 1 && <span className="ml-1 text-indigo-400">+{eventsInGroup.length - 1}</span>}
                                                         </div>
                                                     )}
 
@@ -303,7 +350,7 @@ const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
 
                                                     {/* Tooltip showing ALL events at this position */}
                                                     <div
-                                                        className={`absolute bottom-full mb-4 hidden group-hover:block z-50 w-72 ${tooltipAlignClass}`}>
+                                                        className={`absolute hidden group-hover:block z-50 w-72 ${tooltipBaseClass} ${tooltipAlignClass}`}>
                                                         <div className="bg-slate-800/95 backdrop-blur-md p-3 rounded-lg border border-slate-700 shadow-2xl text-left animate-in fade-in zoom-in-95 duration-200 max-h-80 overflow-y-auto custom-scrollbar">
                                                             {eventsInGroup.length > 1 && (
                                                                 <div className="text-xs text-slate-500 mb-2 pb-2 border-b border-slate-700">
@@ -326,13 +373,15 @@ const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
                                                                         <div className="flex items-center gap-2 text-xs text-slate-400 mb-1">
                                                                             <Calendar className="w-3 h-3" />
                                                                             <span>{formatHEDate(event.date)}</span>
-                                                                            {event.endDate && (
+                                                                            {(event.endDate || event.isCurrent) && (
                                                                                 <span className="text-slate-500">
                                                                                     - {(() => {
                                                                                         const start = new Date(event.date);
-                                                                                        const end = new Date(event.endDate);
+                                                                                        const end = event.isCurrent ? new Date() : new Date(event.endDate!);
                                                                                         const diffTime = Math.abs(end.getTime() - start.getTime());
                                                                                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                                                                        if (event.isCurrent) return "Aujourd'hui";
 
                                                                                         if (diffDays < 30) return `${diffDays} jours`;
                                                                                         if (diffDays < 365) return `${Math.floor(diffDays / 30)} mois`;
@@ -343,15 +392,25 @@ const GlobalTimeline: React.FC<GlobalTimelineProps> = ({ events }) => {
                                                                                 </span>
                                                                             )}
                                                                         </div>
-                                                                        <div className="flex items-center gap-2 text-xs text-slate-400">
-                                                                            <Tag className="w-3 h-3" />
-                                                                            <span className="uppercase">{category?.name || 'Sans catégorie'}</span>
+                                                                        <div className="flex items-center justify-between mt-1">
+                                                                            <div className="flex items-center gap-2 text-xs text-slate-400">
+                                                                                <Tag className="w-3 h-3" />
+                                                                                <span className="uppercase">{category?.name || 'Sans catégorie'}</span>
+                                                                            </div>
+                                                                            {(event.emotionalValence !== undefined && event.emotionalValence !== 0) && (
+                                                                                <div className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${event.emotionalValence > 0
+                                                                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                                                                    : 'bg-red-500/10 text-red-400 border-red-500/20'
+                                                                                    }`}>
+                                                                                    {event.emotionalValence > 0 ? '+' : ''}{event.emotionalValence}
+                                                                                </div>
+                                                                            )}
                                                                         </div>
                                                                     </div>
                                                                 );
                                                             })}
                                                         </div>
-                                                        <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-slate-800 absolute -bottom-1.5 opacity-90 ${arrowAlignClass}`}></div>
+                                                        <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent ${isTopRow ? 'border-b-[6px] border-b-slate-800 absolute -top-1.5' : 'border-t-[6px] border-t-slate-800 absolute -bottom-1.5'} opacity-90 ${arrowAlignClass}`}></div>
                                                     </div>
                                                 </div>
                                             </React.Fragment>
